@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HızlıAlış</title>
+  <style>
+    body { font-family: sans-serif; margin: 0; padding: 0; background: #f5f5f5; }
+    header, footer { background: #111; color: #fff; text-align: center; padding: 1em; }
+    nav a { margin: 0 10px; color: #fff; text-decoration: none; }
+    .container { padding: 20px; max-width: 1000px; margin: auto; background: white; }
+    .hidden { display: none; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #eee; }
+    button { padding: 6px 10px; margin: 2px; }
+    .siparis-kutu { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; }
+    .aktif { background: #e8f8e8; }
+    .gecmis { background: #f9e8e8; }
+    select, input[type=number] { width: 70px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>HızlıAlış</h1>
+  </header>
+  <div class="container">
+
+    <section id="loginSection">
+      <h2>Giriş Yap</h2>
+      <input type="text" id="loginUsername" placeholder="Kullanıcı Adı" />
+      <input type="password" id="loginPassword" placeholder="Şifre" />
+      <button onclick="login()">Giriş</button>
+      <p id="loginMsg" style="color:red;"></p>
+    </section>
+
+    <section id="userSection" class="hidden">
+      <h2>Kullanıcı Paneli</h2>
+      <p>Hoşgeldiniz, <b><span id="userNameDisplay"></span></b> | <button onclick="logout()">Çıkış Yap</button></p>
+
+      <div id="balanceDisplay"></div>
+
+      <h3>Sipariş Ver</h3>
+      <select id="urunSec">
+        <option value="Telefon" data-fiyat="15000">Telefon - 15000 TL</option>
+        <option value="Kulaklık" data-fiyat="500">Kulaklık - 500 TL</option>
+        <option value="Klavye" data-fiyat="1000">Klavye - 1000 TL</option>
+      </select>
+      <input type="number" id="siparisAdet" placeholder="Adet" value="1" min="1" />
+      <button onclick="siparisOlustur()">Sipariş Oluştur</button>
+
+      <h3>Siparişlerim</h3>
+      <div id="aktifSiparisler"><h4>Aktif Siparişler</h4><div id="aktifListesi"></div></div>
+      <div id="gecmisSiparisler"><h4>Geçmiş Siparişler</h4><div id="gecmisListesi"></div></div>
+    </section>
+
+    <section id="adminSection" class="hidden">
+      <h2>Admin Paneli</h2>
+      <p>Hoşgeldiniz, Admin | <button onclick="logout()">Çıkış Yap</button></p>
+
+      <h3>Kullanıcılar</h3>
+      <table id="usersTable">
+        <thead>
+          <tr><th>Kullanıcı</th><th>Bakiye (TL)</th><th>Adres</th><th>İşlemler</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <h3>Seçili Kullanıcının Siparişleri: <span id="selectedUser"></span></h3>
+      <div id="adminSiparisListesi"></div>
+    </section>
+  </div>
+  <footer>
+    <p>&copy; 2025 HızlıAlış</p>
+  </footer>
+
+  <script>
+    // Veri yükleme ve kayıt için yardımcı fonksiyonlar
+    let users = JSON.parse(localStorage.getItem('users')) || { "admin": "admin1212" };
+    let bakiyeler = JSON.parse(localStorage.getItem('bakiyeler')) || { "admin": 0 };
+    let adresler = JSON.parse(localStorage.getItem('adresler')) || { "admin": "" };
+    let siparisler = JSON.parse(localStorage.getItem('siparisler')) || { "admin": [] };
+    let siparisDurumlari = JSON.parse(localStorage.getItem('siparisDurumlari')) || { "admin": [] };
+
+    let aktifKullanici = null;  // Oturumdaki kullanıcı
+    let seciliKullaniciAdmin = null; // Admin panelinde seçilen kullanıcı
+
+    function kaydetVeri() {
+      localStorage.setItem('users', JSON.stringify(users));
+      localStorage.setItem('bakiyeler', JSON.stringify(bakiyeler));
+      localStorage.setItem('adresler', JSON.stringify(adresler));
+      localStorage.setItem('siparisler', JSON.stringify(siparisler));
+      localStorage.setItem('siparisDurumlari', JSON.stringify(siparisDurumlari));
+    }
+
+    function login() {
+      const u = document.getElementById('loginUsername').value.trim();
+      const p = document.getElementById('loginPassword').value.trim();
+      const msg = document.getElementById('loginMsg');
+      if (users[u] && users[u] === p) {
+        aktifKullanici = u;
+        msg.textContent = "";
+        document.getElementById('loginSection').classList.add('hidden');
+        if (u === 'admin') {
+          document.getElementById('adminSection').classList.remove('hidden');
+          adminPanelGoster();
+        } else {
+          document.getElementById('userSection').classList.remove('hidden');
+          document.getElementById('userNameDisplay').textContent = u;
+          bakiyeGoster();
+          siparisleriGoster();
+        }
+      } else {
+        msg.textContent = "Kullanıcı adı veya şifre yanlış.";
+      }
+    }
+
+    function logout() {
+      aktifKullanici = null;
+      seciliKullaniciAdmin = null;
+      document.getElementById('loginSection').classList.remove('hidden');
+      document.getElementById('userSection').classList.add('hidden');
+      document.getElementById('adminSection').classList.add('hidden');
+      document.getElementById('loginUsername').value = '';
+      document.getElementById('loginPassword').value = '';
+      document.getElementById('loginMsg').textContent = '';
+    }
+
+    // Kullanıcı fonksiyonları
+    function bakiyeGoster() {
+      document.getElementById('balanceDisplay').textContent = "Bakiyeniz: " + bakiyeler[aktifKullanici] + " TL";
+    }
+
+    function siparisOlustur() {
+      const urun = document.getElementById('urunSec').value;
+      const adet = parseInt(document.getElementById('siparisAdet').value);
+      if (adet < 1 || isNaN(adet)) return alert("Lütfen geçerli bir adet girin.");
+      const fiyat = parseInt(document.getElementById('urunSec').selectedOptions[0].dataset.fiyat);
+      const toplam = adet * fiyat;
+      if (bakiyeler[aktifKullanici] < toplam) return alert("Yetersiz bakiye!");
+      bakiyeler[aktifKullanici] -= toplam;
+      if (!siparisler[aktifKullanici]) siparisler[aktifKullanici] = [];
+      if (!siparisDurumlari[aktifKullanici]) siparisDurumlari[aktifKullanici] = [];
+      siparisler[aktifKullanici].push(urun + " x" + adet + " (" + toplam + " TL)");
+      siparisDurumlari[aktifKullanici].push("Sipariş Alındı");
+      kaydetVeri();
+      bakiyeGoster();
+      siparisleriGoster();
+      alert("Siparişiniz oluşturuldu. Kalan bakiyeniz: " + bakiyeler[aktifKullanici] + " TL");
+    }
+
+    function siparisleriGoster() {
+      const aktifDiv = document.getElementById('aktifListesi');
+      const gecmisDiv = document.getElementById('gecmisListesi');
+      aktifDiv.innerHTML = "";
+      gecmisDiv.innerHTML = "";
+      const sList = siparisler[aktifKullanici] || [];
+      const dList = siparisDurumlari[aktifKullanici] || [];
+      sList.forEach((siparis, i) => {
+        const durum = dList[i];
+        const el = document.createElement("div");
+        el.className = "siparis-kutu " + (durum === "Teslim Edildi" ? "gecmis" : "aktif");
+        el.textContent = siparis + " | Durum: " + durum;
+        if (durum === "Teslim Edildi") {
+          gecmisDiv.appendChild(el);
+        } else {
+          aktifDiv.appendChild(el);
+        }
+      });
+    }
+
+    // Admin paneli fonksiyonları
+    function adminPanelGoster() {
+      const tbody = document.querySelector("#usersTable tbody");
+      tbody.innerHTML = "";
+      Object.keys(users).forEach(u => {
+        if (u === "admin") return; // admin hariç
+        const tr = document.createElement("tr");
+        const tdUser = document.createElement("td");
+        tdUser.textContent = u;
+        const tdBakiye = document.createElement("td");
+        const bakiyeInput = document.createElement("input");
+        bakiyeInput.type = "number";
+        bakiyeInput.value = bakiyeler[u] || 0;
+        bakiyeInput.style.width = "80px";
+        bakiyeInput.onchange = () => {
+          const val = parseFloat(bakiyeInput.value);
+          if (!isNaN(val)) {
+            bakiyeler[u] = val;
+            kaydetVeri();
+          }
+        };
+        tdBakiye.appendChild(bakiyeInput);
+
+        const tdAdres = document.createElement("td");
+        tdAdres.textContent = adresler[u] || "";
+
+        const tdIslemler = document.createElement("td");
+        const btnSiparisler = document.createElement("button");
+        btnSiparisler.textContent = "Siparişleri Gör";
+        btnSiparisler.onclick = () => {
+          seciliKullaniciAdmin = u;
+          document.getElementById("selectedUser").textContent = u;
+          adminSiparisleriGoster(u);
+        };
+        tdIslemler.appendChild(btnSiparisler);
+
+        tr.appendChild(tdUser);
+        tr.appendChild(tdBakiye);
+        tr.appendChild(tdAdres);
+        tr.appendChild(tdIslemler);
+        tbody.appendChild(tr);
+      });
+    }
+
+    function adminSiparisleriGoster(kullanici) {
+      const container = document.getElementById("adminSiparisListesi");
+      container.innerHTML = "";
+      const sList = siparisler[kullanici] || [];
+      const dList = siparisDurumlari[kullanici] || [];
+      if (sList.length === 0) {
+        container.textContent = "Bu kullanıcının siparişi yok.";
+        return;
+      }
+      sList.forEach((siparis, i) => {
+        const div = document.createElement("div");
+        div.className = "siparis-kutu " + (dList[i] === "Teslim Edildi" ? "gecmis" : "aktif");
+
+        const info = document.createElement("div");
+        info.textContent = siparis + " | Durum: " + dList[i];
+        div.appendChild(info);
+
+        // Durum değiştir dropdown (sipariş alınan, teslim edildi, iptal edildi)
+        const durumSelect = document.createElement("select");
+        ["Sipariş Alındı", "Teslim Edildi", "İptal Edildi"].forEach(durumOpt => {
+          const opt = document.createElement("option");
+          opt.value = durumOpt;
+          opt.textContent = durumOpt;
+          if (durumOpt === dList[i]) opt.selected = true;
+          durumSelect.appendChild(opt);
+        });
+        durumSelect.onchange = () => {
+          // İptal işlemi bakiyeyi iade eder
+          if (durumSelect.value === "İptal Edildi" && dList[i] !== "İptal Edildi") {
+            const tutarMatch = siparis.match(/\((\d+) TL\)/);
+            if (tutarMatch) {
+              const iade = parseFloat(tutarMatch[1]);
+              bakiyeler[kullanici] = (bakiyeler[kullanici] || 0) + iade;
+            }
+          }
+          dList[i] = durumSelect.value;
+          kaydetVeri();
+          adminSiparisleriGoster(kullanici);
+        };
+        div.appendChild(durumSelect);
+
+        container.appendChild(div);
+      });
+    }
+  </script>
+</body>
+</html>
