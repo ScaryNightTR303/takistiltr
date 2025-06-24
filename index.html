@@ -2,24 +2,24 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HızlıAlış</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <style>
     body { font-family: 'Poppins', sans-serif; }
-    #hesapPanel, #sepetPanel { transition: transform 0.3s ease; transform: translateX(100%); }
-    #hesapPanel.active, #sepetPanel.active { transform: translateX(0); }
+    #hesapPanel { transition: transform 0.3s ease; transform: translateX(100%); }
+    #hesapPanel.active { transform: translateX(0); }
     #girisPanel, #kayitPanel, #urunDetayPanel { display: none; }
     html, body { scroll-behavior: smooth; }
   </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
+<body class="bg-gray-100 min-h-screen flex flex-col overflow-y-auto">
 
   <!-- HEADER -->
   <header class="bg-blue-900 text-white p-4 flex justify-between items-center">
     <h1 class="text-2xl font-bold">HızlıAlış</h1>
-    <nav class="flex items-center gap-3">
+    <nav id="topNav" class="flex items-center gap-3">
       <button onclick="girisPanelGoster()" id="btnGiris" class="px-4 py-2 bg-blue-700 rounded hover:bg-blue-600">Giriş Yap</button>
       <button onclick="kayitPanelGoster()" id="btnKayit" class="px-4 py-2 bg-green-700 rounded hover:bg-green-600">Kayıt Ol</button>
       <button onclick="toggleHesapPanel()" id="btnHesap" class="hidden">
@@ -41,6 +41,17 @@
     <h2 class="text-xl font-bold mb-2">Kayıt Ol</h2>
     <input id="kayitKullanici" type="text" placeholder="Kullanıcı Adı" class="border p-2 mb-2 w-full" />
     <input id="kayitSifre" type="password" placeholder="Şifre" class="border p-2 mb-2 w-full" />
+    <input id="kayitTel" type="tel" placeholder="Telefon" class="border p-2 mb-2 w-full" />
+    
+    <!-- İl ve İlçe input + datalist olarak -->
+    <input id="kayitIl" list="ilListesi" placeholder="İl" class="border p-2 mb-2 w-full" autocomplete="off" />
+    <datalist id="ilListesi"></datalist>
+    
+    <input id="kayitIlce" list="ilceListesi" placeholder="İlçe" class="border p-2 mb-2 w-full" autocomplete="off" />
+    <datalist id="ilceListesi"></datalist>
+
+    <input id="kayitAdres" type="text" placeholder="Açık Adres" class="border p-2 mb-2 w-full" />
+    <input id="kayitPosta" type="text" placeholder="Posta Kodu" class="border p-2 mb-2 w-full" />
     <button onclick="kayitOl()" class="bg-green-700 text-white px-4 py-2 rounded">Kayıt Ol</button>
   </section>
 
@@ -72,25 +83,15 @@
         <p id="detayAciklama" class="mb-4"></p>
         <p id="detayFiyat" class="text-xl font-semibold text-green-700 mb-2"></p>
         <p id="detayTarih" class="text-sm text-gray-600 mb-4"></p>
-        <button onclick="sepeteEkle()" class="bg-blue-700 text-white px-4 py-2 rounded">Sipariş Ver</button>
+        <button class="bg-blue-700 text-white px-4 py-2 rounded">Sipariş Ver</button>
       </div>
     </div>
   </div>
 
-  <!-- SEPET PANELİ -->
-  <aside id="sepetPanel" class="fixed top-0 right-0 w-72 h-full bg-white shadow-lg z-40 p-4 flex flex-col hidden">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-semibold">Sepet</h2>
-      <button onclick="toggleSepet()" class="text-2xl">&times;</button>
-    </div>
-    <div id="sepetIcerik" class="flex-1 overflow-y-auto"></div>
-    <button class="mt-4 bg-green-600 text-white px-4 py-2 rounded">Satın Al</button>
-  </aside>
-
   <script>
-    let users = { admin: 'admin1212' }, aktifKullanici = null, urunler = [], aktifUrun = null, sepet = [];
-
-    for (let i = 1; i <= 6; i++) {
+    let users = { admin: 'admin1212' }, aktifKullanici = null;
+    let urunler = [];
+    for (let i = 1; i <= 12; i++) {
       urunler.push({
         id: i,
         ad: `Ürün ${i}`,
@@ -105,34 +106,23 @@
       document.getElementById('girisPanel').style.display = 'block';
       document.getElementById('kayitPanel').style.display = 'none';
     }
-
     function kayitPanelGoster() {
       document.getElementById('kayitPanel').style.display = 'block';
       document.getElementById('girisPanel').style.display = 'none';
     }
-
     function toggleHesapPanel() {
       document.getElementById('hesapPanel').classList.toggle('active');
     }
-
-    function toggleSepet() {
-      const sepetPanel = document.getElementById('sepetPanel');
-      sepetPanel.classList.toggle('hidden');
-    }
-
     function cikisYap() {
       aktifKullanici = null;
       document.getElementById('btnGiris').classList.remove('hidden');
       document.getElementById('btnKayit').classList.remove('hidden');
       document.getElementById('btnHesap').classList.add('hidden');
       document.getElementById('urunler').classList.add('hidden');
-      document.getElementById('adminPanelBtn').classList.add('hidden');
       toggleHesapPanel();
     }
-
     function girisYap() {
-      const k = document.getElementById('girisKullanici').value.trim(),
-            s = document.getElementById('girisSifre').value;
+      let k = document.getElementById('girisKullanici').value.trim(), s = document.getElementById('girisSifre').value;
       if (users[k] === s) {
         aktifKullanici = k;
         document.getElementById('btnGiris').classList.add('hidden');
@@ -141,21 +131,19 @@
         document.getElementById('girisPanel').style.display = 'none';
         document.getElementById('kayitPanel').style.display = 'none';
         document.getElementById('urunler').classList.remove('hidden');
+        toggleHesapPanel();
         if (k === 'admin') document.getElementById('adminPanelBtn').classList.remove('hidden');
         urunleriYukle();
       } else alert('Hatalı bilgi');
     }
-
     function kayitOl() {
-      const k = document.getElementById('kayitKullanici').value.trim(),
-            s = document.getElementById('kayitSifre').value;
+      let k = document.getElementById('kayitKullanici').value.trim(), s = document.getElementById('kayitSifre').value;
       if (k && s && !users[k]) {
         users[k] = s;
         alert('Kayıt başarılı');
         girisPanelGoster();
       } else alert('Geçersiz ya da mevcut kullanıcı');
     }
-
     function urunleriYukle() {
       const container = document.getElementById('urunler');
       container.innerHTML = '';
@@ -169,13 +157,12 @@
             <h3 class="text-lg font-bold">${u.ad}</h3>
             <p class="text-sm text-gray-600">${u.aciklama}</p>
             <p class="text-green-600 font-semibold mt-2">${u.fiyat}</p>
-          </div>`;
+          </div>
+        `;
         container.appendChild(div);
       });
     }
-
     function urunDetayGoster(u) {
-      aktifUrun = u;
       document.getElementById('urunDetayPanel').classList.remove('hidden');
       document.getElementById('detayResim').src = u.resim;
       document.getElementById('detayBaslik').textContent = u.ad;
@@ -183,32 +170,51 @@
       document.getElementById('detayFiyat').textContent = u.fiyat;
       document.getElementById('detayTarih').textContent = `Yüklenme Tarihi: ${u.tarih}`;
     }
-
     function kapatDetay() {
       document.getElementById('urunDetayPanel').classList.add('hidden');
     }
 
-    function sepeteEkle() {
-      sepet.push(aktifUrun);
-      kapatDetay();
-      guncelleSepet();
-      toggleSepet();
-    }
+    // İl/ilçe örnek verisi
+    const ilceler = {
+      'İstanbul': ['Kadıköy', 'Beşiktaş', 'Üsküdar'],
+      'Ankara': ['Çankaya', 'Keçiören', 'Sincan'],
+    };
 
-    function guncelleSepet() {
-      const panel = document.getElementById('sepetIcerik');
-      panel.innerHTML = '';
-      sepet.forEach((u, i) => {
-        let div = document.createElement('div');
-        div.className = 'border-b p-2';
-        div.innerHTML = `<p class="font-medium">${u.ad}</p><p class="text-sm text-gray-600">${u.fiyat}</p>`;
-        panel.appendChild(div);
+    const ilInput = document.getElementById('kayitIl');
+    const ilceInput = document.getElementById('kayitIlce');
+    const ilListesi = document.getElementById('ilListesi');
+    const ilceListesi = document.getElementById('ilceListesi');
+
+    // İl listesini datalist içine doldur
+    function ileriDoldur() {
+      ilListesi.innerHTML = '';
+      Object.keys(ilceler).forEach(il => {
+        let option = document.createElement('option');
+        option.value = il;
+        ilListesi.appendChild(option);
       });
     }
 
-    function adminPanelGoster() {
-      alert("Admin Panel (örnek olarak gösterildi)");
+    // İlçe listesini seçilen ile göre datalist olarak güncelle
+    function ilceDoldur(il) {
+      ilceListesi.innerHTML = '';
+      if (ilceler[il]) {
+        ilceler[il].forEach(ilce => {
+          let option = document.createElement('option');
+          option.value = ilce;
+          ilceListesi.appendChild(option);
+        });
+      }
     }
+
+    ilInput.addEventListener('input', () => {
+      ilceInput.value = ''; // İlçe inputunu temizle
+      ilceDoldur(ilInput.value);
+    });
+
+    // Sayfa açıldığında illeri yükle
+    ileriDoldur();
   </script>
+
 </body>
 </html>
