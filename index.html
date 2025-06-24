@@ -70,16 +70,19 @@
     max-width: 1200px;
     margin: auto;
   }
+  /* Ürünler yatay grid, responsive */
   .products {
-    display: grid;
-    grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+    display: flex;
+    flex-wrap: wrap;
     gap: 20px;
+    justify-content: flex-start;
   }
   .product-card {
     border: 1px solid #ddd;
     border-radius: 8px;
     overflow: hidden;
     background: #fefefe;
+    flex: 0 1 220px; /* Esnek genişlik 220px, taşarsa alt satıra geç */
     display: flex;
     flex-direction: column;
     transition: box-shadow 0.3s ease;
@@ -141,7 +144,7 @@
   .modal {
     background: white;
     border-radius: 10px;
-    max-width: 500px;
+    max-width: 550px;
     width: 100%;
     max-height: 90vh;
     overflow-y: auto;
@@ -224,13 +227,17 @@
     margin-bottom: 6px;
     font-weight: 600;
   }
-  form input, form select {
+  form input, form select, form textarea {
     width: 100%;
     padding: 8px;
     margin-bottom: 15px;
     border: 1px solid #ccc;
     border-radius: 6px;
     font-size: 1rem;
+  }
+  form textarea {
+    resize: vertical;
+    min-height: 60px;
   }
   form button.submit-btn {
     background: #28a745;
@@ -300,6 +307,7 @@
     border: 1px solid #ccc;
     padding: 8px 12px;
     text-align: left;
+    vertical-align: top;
   }
   th {
     background: #003366;
@@ -348,9 +356,17 @@
     <div class="cart-items" id="cartItems"></div>
     <form id="orderForm">
       <h3>Sipariş Bilgileri</h3>
+      <label for="firstName">İsim</label>
+      <input type="text" id="firstName" name="firstName" required placeholder="İsim" />
+      <label for="lastName">Soyisim</label>
+      <input type="text" id="lastName" name="lastName" required placeholder="Soyisim" />
+      <label for="phone">Telefon (+90 ile başlayacak)</label>
+      <input type="tel" id="phone" name="phone" pattern="^\+90\d{10}$" required placeholder="+90xxxxxxxxxx" />
+      <label for="note">Not (İsteğe bağlı)</label>
+      <textarea id="note" name="note" placeholder="Siparişle ilgili notunuz..."></textarea>
       <label for="address">Adresiniz</label>
-      <input type="text" id="address" name="address" required placeholder="Adresinizi giriniz" />
-      <label for="bankInfo">Banka/Kart Bilgisi</label>
+      <textarea id="address" name="address" required placeholder="Adresinizi giriniz"></textarea>
+      <label for="bankInfo">Banka / Kart Bilgisi</label>
       <input type="text" id="bankInfo" name="bankInfo" required placeholder="Kart bilgisi" />
       <button type="submit" class="submit-btn">Siparişi Onayla</button>
     </form>
@@ -391,9 +407,9 @@
     <h2 id="adminLoginTitle">Admin Girişi</h2>
     <form id="adminLoginForm">
       <label for="adminUser">Kullanıcı Adı</label>
-      <input type="text" id="adminUser" name="adminUser" required placeholder="Kullanıcı adı" />
+      <input type="text" id="adminUser" name="adminUser" required autocomplete="username" />
       <label for="adminPass">Şifre</label>
-      <input type="password" id="adminPass" name="adminPass" required placeholder="Şifre" />
+      <input type="password" id="adminPass" name="adminPass" required autocomplete="current-password" />
       <button type="submit" class="submit-btn">Giriş Yap</button>
     </form>
   </div>
@@ -401,57 +417,57 @@
 
 <!-- Admin Panel Modal -->
 <div class="modal-bg" id="adminPanelModal" role="dialog" aria-modal="true" aria-labelledby="adminPanelTitle">
-  <div class="modal" style="max-width: 950px; overflow-y: auto;">
+  <div class="modal" style="max-width: 95vw; max-height: 95vh; overflow-y: auto;">
     <button class="close-btn" id="closeAdminPanel">&times;</button>
-    <h2 id="adminPanelTitle">Admin Panel</h2>
+    <h2 id="adminPanelTitle">Admin Paneli</h2>
     <div id="adminPanel">
-      <!-- Kullanıcılar ve sipariş tablosu buraya gelecek -->
+      <!-- Kullanıcılar, siparişler ve durumları burada listelenecek -->
     </div>
   </div>
 </div>
 
 <script>
 (() => {
-  // Ürün verileri (20 tane, gerçekçi görseller)
-  const products = [
-    {id:1,title:"Kadın Beyaz Tişört",price:79.90,img:"https://cdn.pixabay.com/photo/2016/03/27/21/49/woman-1284413_1280.jpg"},
-    {id:2,title:"Erkek Siyah Mont",price:249.90,img:"https://cdn.pixabay.com/photo/2015/03/26/09/54/man-690032_1280.jpg"},
-    {id:3,title:"Kadın Kot Pantolon",price:129.90,img:"https://cdn.pixabay.com/photo/2017/08/06/22/26/woman-2597921_1280.jpg"},
-    {id:4,title:"Erkek Spor Ayakkabı",price:199.90,img:"https://cdn.pixabay.com/photo/2017/07/31/11/21/man-2557417_1280.jpg"},
-    {id:5,title:"Kadın Güneş Gözlüğü",price:69.90,img:"https://cdn.pixabay.com/photo/2016/11/21/15/48/woman-1846417_1280.jpg"},
-    {id:6,title:"Erkek Deri Cüzdan",price:149.90,img:"https://cdn.pixabay.com/photo/2016/11/29/03/53/wallet-1869956_1280.jpg"},
-    {id:7,title:"Kadın Çanta",price:179.90,img:"https://cdn.pixabay.com/photo/2017/06/07/08/58/woman-2387433_1280.jpg"},
-    {id:8,title:"Erkek Saat",price:299.90,img:"https://cdn.pixabay.com/photo/2015/10/29/20/37/wristwatch-1013282_1280.jpg"},
-    {id:9,title:"Kadın Spor Tayt",price:99.90,img:"https://cdn.pixabay.com/photo/2017/09/07/10/51/girl-2722825_1280.jpg"},
-    {id:10,title:"Erkek Şapka",price:49.90,img:"https://cdn.pixabay.com/photo/2016/11/21/14/18/man-1846129_1280.jpg"},
-    {id:11,title:"Kadın Elbise",price:299.90,img:"https://cdn.pixabay.com/photo/2017/03/30/12/37/woman-2191546_1280.jpg"},
-    {id:12,title:"Erkek T-Shirt",price:89.90,img:"https://cdn.pixabay.com/photo/2016/03/26/22/22/people-1284025_1280.jpg"},
-    {id:13,title:"Kadın Bot",price:249.90,img:"https://cdn.pixabay.com/photo/2017/08/02/01/02/woman-2562093_1280.jpg"},
-    {id:14,title:"Erkek Pantolon",price:149.90,img:"https://cdn.pixabay.com/photo/2017/02/15/10/47/man-2068221_1280.jpg"},
-    {id:15,title:"Kadın Şal",price:59.90,img:"https://cdn.pixabay.com/photo/2017/01/20/00/30/woman-1990346_1280.jpg"},
-    {id:16,title:"Erkek Ceket",price:299.90,img:"https://cdn.pixabay.com/photo/2017/01/30/16/48/man-2023254_1280.jpg"},
-    {id:17,title:"Kadın Spor Ayakkabı",price:199.90,img:"https://cdn.pixabay.com/photo/2015/01/19/13/51/woman-604089_1280.jpg"},
-    {id:18,title:"Erkek Spor Çanta",price:179.90,img:"https://cdn.pixabay.com/photo/2016/12/06/22/06/backpack-1888224_1280.jpg"},
-    {id:19,title:"Kadın Takı Seti",price:129.90,img:"https://cdn.pixabay.com/photo/2017/04/12/16/45/woman-2224173_1280.jpg"},
-    {id:20,title:"Erkek Spor Ayakkabı 2",price:179.90,img:"https://cdn.pixabay.com/photo/2016/11/23/14/45/shoes-1850217_1280.jpg"},
-  ];
-
-  // LocalStorage anahtarları
+  // Sabitler
+  const ADMIN_USER = "admin";
+  const ADMIN_PASS = "admin";
   const CART_KEY = "mottotrend_cart";
   const ORDERS_KEY = "mottotrend_orders";
   const USERS_KEY = "mottotrend_users";
-  const ADMIN_USER = "admin";
-  const ADMIN_PASS = "admin";
 
-  // Sepet, sipariş, kullanıcı verileri
+  // Ürün verisi: 20 adet, Google’dan seçilmiş kaliteli görsellerle, fiyatlar rastgele 49-499 arası
+  const products = [
+    {id:1, title:"Erkek Beyaz Sneaker", price:199.90, img:"https://i.ibb.co/WnxY4g1/white-sneaker.jpg"},
+    {id:2, title:"Kadın Siyah Deri Çanta", price:349.90, img:"https://i.ibb.co/QYvBzxy/black-leather-bag.jpg"},
+    {id:3, title:"Unisex Spor Saat", price:299.90, img:"https://i.ibb.co/KXnWJ1M/sports-watch.jpg"},
+    {id:4, title:"Kahverengi Deri Cüzdan", price:89.90, img:"https://i.ibb.co/GC0TJwY/leather-wallet.jpg"},
+    {id:5, title:"Mavi Kot Pantolon", price:159.90, img:"https://i.ibb.co/F7xj6Md/blue-jeans.jpg"},
+    {id:6, title:"Siyah Basic Tişört", price:69.90, img:"https://i.ibb.co/7QtGq1r/black-tee.jpg"},
+    {id:7, title:"Güneş Gözlüğü Retro", price:139.90, img:"https://i.ibb.co/r7WNX76/retro-sunglasses.jpg"},
+    {id:8, title:"Kadın Kırmızı Elbise", price:399.90, img:"https://i.ibb.co/f2FC5ST/red-dress.jpg"},
+    {id:9, title:"Erkek Spor Ayakkabı", price:249.90, img:"https://i.ibb.co/xJbBR5v/sports-shoes.jpg"},
+    {id:10, title:"Kadın Beyaz Bluz", price:179.90, img:"https://i.ibb.co/vZcRrVW/white-blouse.jpg"},
+    {id:11, title:"Siyah Deri Bot", price:379.90, img:"https://i.ibb.co/8BTtLTY/black-leather-boot.jpg"},
+    {id:12, title:"Mavi Spor Mont", price:299.90, img:"https://i.ibb.co/M9c3c2f/sport-jacket.jpg"},
+    {id:13, title:"Erkek Kot Ceket", price:219.90, img:"https://i.ibb.co/Hhq08dq/denim-jacket.jpg"},
+    {id:14, title:"Kadın Spor Tayt", price:99.90, img:"https://i.ibb.co/fYjJZx6/sport-leggings.jpg"},
+    {id:15, title:"Erkek Siyah Kemer", price:89.90, img:"https://i.ibb.co/FxJHpCt/black-belt.jpg"},
+    {id:16, title:"Kadın Bej Triko", price:129.90, img:"https://i.ibb.co/9rFxYqP/beige-knitwear.jpg"},
+    {id:17, title:"Erkek Beyaz Gömlek", price:149.90, img:"https://i.ibb.co/R0kGKHy/white-shirt.jpg"},
+    {id:18, title:"Kadın Siyah Şapka", price:59.90, img:"https://i.ibb.co/LP9by1S/black-hat.jpg"},
+    {id:19, title:"Erkek Spor Şapka", price:49.90, img:"https://i.ibb.co/wKg8HWx/sport-cap.jpg"},
+    {id:20, title:"Kadın Kırmızı Çanta", price:219.90, img:"https://i.ibb.co/t2hJ8hq/red-bag.jpg"},
+  ];
+
+  // Veriler localStorage'dan yükleniyor
   let cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
   let orders = JSON.parse(localStorage.getItem(ORDERS_KEY)) || [];
   let users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
 
-  // Şu anki admin login durumu
+  // Admin login durumu
   let adminLoggedIn = false;
 
-  // Elements
+  // Elementler
   const productsContainer = document.getElementById("productsContainer");
   const cartBtn = document.getElementById("cartBtn");
   const orderTrackBtn = document.getElementById("orderTrackBtn");
@@ -461,8 +477,11 @@
   const adminLoginModal = document.getElementById("adminLoginModal");
   const adminPanelModal = document.getElementById("adminPanelModal");
 
-  // Cart count span
   const cartCountSpan = document.getElementById("cartCount");
+  const cartItemsContainer = document.getElementById("cartItems");
+  const orderForm = document.getElementById("orderForm");
+  const orderTrackContent = document.getElementById("orderTrackContent");
+  const adminPanelDiv = document.getElementById("adminPanel");
 
   // Sepet sayısını güncelle
   function updateCartCount() {
@@ -477,20 +496,18 @@
       const card = document.createElement("article");
       card.className = "product-card";
       card.innerHTML = `
-        <img src="${p.img}" alt="${p.title}" />
+        <img src="${p.img}" alt="${p.title}" loading="lazy" />
         <div class="product-info">
           <div class="product-title">${p.title}</div>
           <div class="product-price">${p.price.toFixed(2)}₺</div>
-          <button class="add-cart-btn" data-id="${p.id}">Sepete Ekle</button>
+          <button class="add-cart-btn" data-id="${p.id}" aria-label="${p.title} sepete ekle">Sepete Ekle</button>
         </div>
       `;
       productsContainer.appendChild(card);
     });
   }
 
-  // Sepeti göster
-  const cartItemsContainer = document.getElementById("cartItems");
-  const orderForm = document.getElementById("orderForm");
+  // Sepeti renderla
   function renderCart() {
     if(cart.length === 0) {
       cartItemsContainer.innerHTML = "<p>Sepetiniz boş.</p>";
@@ -507,19 +524,19 @@
         <img src="${p.img}" alt="${p.title}" />
         <div class="cart-item-info">
           <div class="cart-item-title">${p.title}</div>
-          <div class="cart-item-qty">
-            <button class="qty-btn" data-id="${item.id}" data-action="dec">-</button>
+          <div class="cart-item-qty" aria-label="Adet kontrolü">
+            <button class="qty-btn" data-id="${item.id}" data-action="dec" aria-label="Azalt">-</button>
             <span class="qty-num">${item.qty}</span>
-            <button class="qty-btn" data-id="${item.id}" data-action="inc">+</button>
+            <button class="qty-btn" data-id="${item.id}" data-action="inc" aria-label="Arttır">+</button>
           </div>
         </div>
-        <button class="remove-btn" data-id="${item.id}" title="Ürünü kaldır">&times;</button>
+        <button class="remove-btn" data-id="${item.id}" aria-label="Ürünü kaldır">&times;</button>
       `;
       cartItemsContainer.appendChild(div);
     });
   }
 
-  // Sepete ürün ekle
+  // Sepete ekle
   function addToCart(id) {
     const found = cart.find(i => i.id === id);
     if(found) found.qty++;
@@ -528,7 +545,7 @@
     updateCartCount();
   }
 
-  // Sepetten ürün çıkar / azalt / kaldır
+  // Sepette değişiklik
   function updateCartItem(id, action) {
     const found = cart.find(i => i.id === id);
     if(!found) return;
@@ -540,15 +557,13 @@
       }
     }
     saveCart();
-    updateCartCount();
   }
   function removeCartItem(id) {
     cart = cart.filter(i => i.id !== id);
     saveCart();
-    updateCartCount();
   }
 
-  // Verileri kaydet
+  // Kaydet
   function saveCart() {
     localStorage.setItem(CART_KEY, JSON.stringify(cart));
   }
@@ -568,42 +583,62 @@
     cartModal.classList.remove("active");
   });
 
-  // Sepetteki buton işlemleri (artır/azalt/kaldır)
+  // Sepette buton işlemleri
   cartItemsContainer.addEventListener("click", (e) => {
     if(e.target.classList.contains("qty-btn")) {
       const id = Number(e.target.dataset.id);
       const action = e.target.dataset.action;
       updateCartItem(id, action);
       renderCart();
-    } else if(e.target.classList.contains("remove-btn")) {
+      updateCartCount();
+    }
+    else if(e.target.classList.contains("remove-btn")) {
       const id = Number(e.target.dataset.id);
       removeCartItem(id);
       renderCart();
+      updateCartCount();
     }
   });
 
-  // Sepet sipariş formu gönderme
-  orderForm.addEventListener("submit", (e) => {
+  // Sipariş formu gönderme
+  orderForm.addEventListener("submit", e => {
     e.preventDefault();
     if(cart.length === 0) {
       alert("Sepetiniz boş!");
       return;
     }
+    const firstName = orderForm.firstName.value.trim();
+    const lastName = orderForm.lastName.value.trim();
+    const phone = orderForm.phone.value.trim();
+    const note = orderForm.note.value.trim();
     const address = orderForm.address.value.trim();
     const bankInfo = orderForm.bankInfo.value.trim();
-    if(!address || !bankInfo) {
-      alert("Lütfen tüm bilgileri doldurun.");
+
+    if(!firstName || !lastName || !phone || !address || !bankInfo) {
+      alert("Lütfen tüm zorunlu alanları doldurun.");
       return;
     }
-    // Yeni kullanıcı ve sipariş kaydı
-    const now = new Date().toISOString();
-    const userId = Date.now(); // basit id
+    if(!/^\+90\d{10}$/.test(phone)) {
+      alert("Telefon numarası +90 ile başlamalı ve toplam 13 karakter olmalıdır.");
+      return;
+    }
 
-    // Kullanıcı kaydet
-    users.push({id:userId, address, bankInfo, created: now});
+    // Kullanıcı ve sipariş kaydı
+    const now = new Date().toISOString();
+    const userId = Date.now();
+
+    users.push({
+      id: userId,
+      firstName,
+      lastName,
+      phone,
+      note,
+      address,
+      bankInfo,
+      created: now
+    });
     saveUsers();
 
-    // Sipariş kaydet (sepetteki ürünler + durum)
     orders.push({
       userId,
       date: now,
@@ -612,7 +647,7 @@
     });
     saveOrders();
 
-    alert("Siparişiniz alındı! Sipariş takip bölümünden kontrol edebilirsiniz.");
+    alert("Siparişiniz başarıyla alındı! Sipariş takip butonundan kontrol edebilirsiniz.");
 
     // Sepeti temizle
     cart = [];
@@ -621,7 +656,7 @@
     cartModal.classList.remove("active");
   });
 
-  // Sipariş Takip Modal aç/kapa
+  // Sipariş Takip modal aç/kapa
   orderTrackBtn.addEventListener("click", () => {
     renderOrderTrack();
     orderTrackModal.classList.add("active");
@@ -631,11 +666,10 @@
   });
 
   // Sipariş Takip gösterimi
-  const orderTrackContent = document.getElementById("orderTrackContent");
   function renderOrderTrack() {
     orderTrackContent.innerHTML = "";
     if(orders.length === 0) {
-      orderTrackContent.innerHTML = "<p>Henüz siparişiniz bulunmamaktadır. <a href='#'>Alışverişe başlayın!</a></p>";
+      orderTrackContent.innerHTML = `<p>Henüz siparişiniz bulunmamaktadır. <a href="#" onclick="closeOrderTrackAndOpenCart(event)">Alışverişe başlayın!</a></p>`;
       return;
     }
     // En son siparişi göster
@@ -643,19 +677,35 @@
     // Kullanıcı bilgisi
     const user = users.find(u => u.id === lastOrder.userId);
 
+    if(!user) {
+      orderTrackContent.innerHTML = `<p>Sipariş bilgisi bulunamadı.</p>`;
+      return;
+    }
+
     let html = `<p><strong>Sipariş Tarihi:</strong> ${new Date(lastOrder.date).toLocaleString()}</p>`;
-    html += "<ul>";
+    html += `<ul>`;
     lastOrder.products.forEach(item => {
       const p = products.find(pr => pr.id === item.id);
       html += `<li>${p.title} x${item.qty}</li>`;
     });
-    html += "</ul>";
-    html += `<p><strong>Adres:</strong> ${user ? user.address : "Bilinmiyor"}</p>`;
+    html += `</ul>`;
+    html += `<p><strong>İsim Soyisim:</strong> ${user.firstName} ${user.lastName}</p>`;
+    html += `<p><strong>Telefon:</strong> ${user.phone}</p>`;
+    html += `<p><strong>Not:</strong> ${user.note || "-"}</p>`;
+    html += `<p><strong>Adres:</strong> ${user.address}</p>`;
     html += `<p><strong>Kargo Durumu:</strong> <em>${lastOrder.status}</em></p>`;
+
     orderTrackContent.innerHTML = html;
   }
 
-  // Admin login modal aç/kapa
+  // Alışverişe yönlendirme linki işlevi
+  window.closeOrderTrackAndOpenCart = function(event) {
+    event.preventDefault();
+    orderTrackModal.classList.remove("active");
+    cartModal.classList.add("active");
+  }
+
+  // Admin Giriş modal aç/kapa
   adminLoginBtn.addEventListener("click", () => {
     adminLoginModal.classList.add("active");
   });
@@ -679,7 +729,7 @@
     }
   });
 
-  // Admin panel modal aç/kapa
+  // Admin Panel modal aç/kapa
   function showAdminPanel() {
     if(!adminLoggedIn) {
       alert("Lütfen önce admin girişi yapın.");
@@ -692,9 +742,7 @@
     adminPanelModal.classList.remove("active");
   });
 
-  // Admin panel içeriği
-  const adminPanelDiv = document.getElementById("adminPanel");
-
+  // Admin Panel içeriği render
   function renderAdminPanel() {
     if(users.length === 0) {
       adminPanelDiv.innerHTML = "<p>Henüz kullanıcı veya sipariş bulunmamaktadır.</p>";
@@ -702,18 +750,33 @@
     }
     let html = `<h3>Kullanıcılar ve Siparişleri</h3>`;
     html += `<table><thead>
-      <tr><th>Kullanıcı ID</th><th>Kayıt Tarihi</th><th>Siparişler</th></tr>
+      <tr>
+        <th>Kullanıcı ID</th>
+        <th>İsim Soyisim</th>
+        <th>Telefon</th>
+        <th>Not</th>
+        <th>Adres</th>
+        <th>IBAN / Kart</th>
+        <th>Kayıt Tarihi</th>
+        <th>Siparişler & Durum</th>
+      </tr>
     </thead><tbody>`;
     users.forEach(user => {
       const userOrders = orders.filter(o => o.userId === user.id);
       html += `<tr>
         <td>${user.id}</td>
+        <td>${user.firstName} ${user.lastName}</td>
+        <td>${user.phone}</td>
+        <td>${user.note || "-"}</td>
+        <td>${user.address}</td>
+        <td>${user.bankInfo}</td>
         <td>${new Date(user.created).toLocaleString()}</td>
         <td>`;
       if(userOrders.length === 0) html += "Sipariş yok";
       else {
         userOrders.forEach(order => {
-          html += `<div><strong>${new Date(order.date).toLocaleString()}</strong><br/>`;
+          html += `<div style="margin-bottom:10px; border-bottom:1px solid #ccc; padding-bottom:8px;">
+            <strong>${new Date(order.date).toLocaleString()}</strong><br/>`;
           order.products.forEach(item => {
             const p = products.find(pr => pr.id === item.id);
             html += `${p.title} x${item.qty}<br/>`;
@@ -723,36 +786,50 @@
             <option value="Hazırlanıyor" ${order.status === "Hazırlanıyor" ? "selected" : ""}>Hazırlanıyor</option>
             <option value="Yola çıktı" ${order.status === "Yola çıktı" ? "selected" : ""}>Yola çıktı</option>
             <option value="Teslim edildi" ${order.status === "Teslim edildi" ? "selected" : ""}>Teslim edildi</option>
+            <option value="İptal edildi" ${order.status === "İptal edildi" ? "selected" : ""}>İptal edildi</option>
           </select>
-          </div><hr/>`;
+          </div>`;
         });
       }
       html += `</td></tr>`;
     });
-    html += `</tbody></table>`;
+    html += "</tbody></table>";
     adminPanelDiv.innerHTML = html;
-
-    // Status değişim dinleyicisi
-    document.querySelectorAll(".status-select").forEach(sel => {
-      sel.addEventListener("change", e => {
-        const orderDate = e.target.dataset.orderid;
-        const newStatus = e.target.value;
-        const order = orders.find(o => o.date === orderDate);
-        if(order) {
-          order.status = newStatus;
-          saveOrders();
-          alert("Sipariş durumu güncellendi.");
-        }
-      });
-    });
   }
 
-  // Ürün ekle butonları dinle
-  productsContainer.addEventListener("click", e => {
-    if(e.target.classList.contains("add-cart-btn")) {
-      const id = Number(e.target.dataset.id);
-      addToCart(id);
-      alert("Ürün sepete eklendi.");
+  // Admin panelde sipariş durumu değiştirme
+  adminPanelDiv.addEventListener("change", e => {
+    if(e.target.classList.contains("status-select")) {
+      const orderDate = e.target.dataset.orderid;
+      const newStatus = e.target.value;
+      const order = orders.find(o => o.date === orderDate);
+      if(order) {
+        order.status = newStatus;
+        saveOrders();
+        alert("Sipariş durumu güncellendi.");
+      }
+    }
+  });
+
+  // Admin panel açma butonu footerda
+  const adminLoginFooter = document.querySelector(".admin-login");
+  const adminPanelToggleBtn = document.createElement("button");
+  adminPanelToggleBtn.textContent = "Admin Panel";
+  adminPanelToggleBtn.style.marginTop = "10px";
+  adminPanelToggleBtn.style.background = "#28a745";
+  adminPanelToggleBtn.style.color = "white";
+  adminPanelToggleBtn.style.border = "none";
+  adminPanelToggleBtn.style.padding = "10px 15px";
+  adminPanelToggleBtn.style.borderRadius = "6px";
+  adminPanelToggleBtn.style.fontWeight = "700";
+  adminPanelToggleBtn.style.cursor = "pointer";
+  adminLoginFooter.appendChild(adminPanelToggleBtn);
+  adminPanelToggleBtn.addEventListener("click", () => {
+    if(adminLoggedIn) {
+      showAdminPanel();
+    } else {
+      alert("Önce admin girişi yapmalısınız.");
+      adminLoginModal.classList.add("active");
     }
   });
 
