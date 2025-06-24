@@ -50,7 +50,7 @@
   </section>
 
   <!-- HESAP PANELİ -->
-  <aside id="hesapPanel" class="fixed top-0 right-0 w-64 h-full bg-white shadow-lg z-50 p-4 flex flex-col transform translate-x-full">
+  <aside id="hesapPanel" class="fixed top-0 right-0 w-64 h-full bg-white shadow-lg z-50 p-4 flex flex-col">
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-xl font-semibold">Hesabım</h2>
       <button onclick="toggleHesapPanel()" class="text-2xl">&times;</button>
@@ -99,12 +99,10 @@
     function girisPanelGoster() {
       document.getElementById('girisPanel').style.display = 'block';
       document.getElementById('kayitPanel').style.display = 'none';
-      document.getElementById('hesapPanel').classList.remove('active');
     }
     function kayitPanelGoster() {
       document.getElementById('kayitPanel').style.display = 'block';
       document.getElementById('girisPanel').style.display = 'none';
-      document.getElementById('hesapPanel').classList.remove('active');
     }
     function toggleHesapPanel() {
       document.getElementById('hesapPanel').classList.toggle('active');
@@ -127,7 +125,6 @@
         document.getElementById('girisPanel').style.display = 'none';
         document.getElementById('kayitPanel').style.display = 'none';
         document.getElementById('urunler').classList.remove('hidden');
-        document.getElementById('hesapPanel').classList.remove('active');
         if (k === 'admin') document.getElementById('adminPanelBtn').classList.remove('hidden');
         urunleriYukle();
       } else alert('Hatalı bilgi');
