@@ -57,15 +57,14 @@
     </div>
     <div id="hesapBilgi" class="flex-1 overflow-y-auto">
       <p class="mb-2 font-medium">Hoş geldiniz!</p>
+      <div id="siparisler"></div>
     </div>
     <button id="adminPanelBtn" onclick="adminPanelGoster()" class="hidden bg-purple-700 text-white px-4 py-2 mt-2 rounded">Admin Panel</button>
     <button onclick="cikisYap()" class="mt-auto bg-red-600 text-white px-4 py-2 rounded hover:bg-red-500">Çıkış Yap</button>
   </aside>
 
   <!-- ÜRÜNLER -->
-  <main id="urunler" class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 hidden">
-    <!-- JS ile ürünler yüklenecek -->
-  </main>
+  <main id="urunler" class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 hidden"></main>
 
   <!-- ÜRÜN DETAY PANELİ -->
   <div id="urunDetayPanel" class="fixed inset-0 bg-white z-50 p-6 overflow-auto hidden">
@@ -77,14 +76,14 @@
         <p id="detayAciklama" class="mb-4"></p>
         <p id="detayFiyat" class="text-xl font-semibold text-green-700 mb-2"></p>
         <p id="detayTarih" class="text-sm text-gray-600 mb-4"></p>
-        <button onclick="alert('Sipariş verildi!')" class="bg-blue-700 text-white px-4 py-2 rounded">Sipariş Ver</button>
+        <button onclick="siparisVer()" class="bg-blue-700 text-white px-4 py-2 rounded">Sipariş Ver</button>
       </div>
     </div>
   </div>
 
   <script>
     let users = { admin: 'admin1212' }, aktifKullanici = null;
-    let urunler = [];
+    let urunler = [], seciliUrun = null, siparisKayit = {};
     for (let i = 1; i <= 12; i++) {
       urunler.push({
         id: i,
@@ -127,8 +126,9 @@
         document.getElementById('kayitPanel').style.display = 'none';
         document.getElementById('urunler').classList.remove('hidden');
         if (k === 'admin') document.getElementById('adminPanelBtn').classList.remove('hidden');
-        toggleHesapPanel();
         urunleriYukle();
+        toggleHesapPanel();
+        guncelleSiparisler();
       } else alert('Hatalı bilgi');
     }
     function kayitOl() {
@@ -158,6 +158,7 @@
       });
     }
     function urunDetayGoster(u) {
+      seciliUrun = u;
       document.getElementById('urunDetayPanel').classList.remove('hidden');
       document.getElementById('detayResim').src = u.resim;
       document.getElementById('detayBaslik').textContent = u.ad;
@@ -168,8 +169,28 @@
     function kapatDetay() {
       document.getElementById('urunDetayPanel').classList.add('hidden');
     }
+    function siparisVer() {
+      if (!aktifKullanici || !seciliUrun) return;
+      if (!siparisKayit[aktifKullanici]) siparisKayit[aktifKullanici] = [];
+      siparisKayit[aktifKullanici].push(seciliUrun);
+      alert("Sipariş alındı");
+      kapatDetay();
+      guncelleSiparisler();
+    }
+    function guncelleSiparisler() {
+      let alan = document.getElementById('siparisler');
+      alan.innerHTML = '';
+      if (!siparisKayit[aktifKullanici]) return;
+      siparisKayit[aktifKullanici].forEach((u, i) => {
+        let p = document.createElement('p');
+        p.textContent = `${i + 1}. ${u.ad} - ${u.fiyat}`;
+        alan.appendChild(p);
+      });
+    }
+    function adminPanelGoster() {
+      alert("Toplam Kayıtlı Kullanıcı: " + Object.keys(users).length);
+    }
 
-    // İl/ilçe örnek
     const ilceler = {
       'İstanbul': ['Kadıköy', 'Beşiktaş', 'Üsküdar'],
       'Ankara': ['Çankaya', 'Keçiören', 'Sincan'],
@@ -192,6 +213,5 @@
       });
     });
   </script>
-
 </body>
 </html>
