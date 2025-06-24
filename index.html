@@ -10,7 +10,7 @@
     body { font-family: 'Poppins', sans-serif; }
     #hesapPanel { transition: transform 0.3s ease; transform: translateX(100%); }
     #hesapPanel.active { transform: translateX(0); }
-    #girisPanel, #kayitPanel { display: none; }
+    #girisPanel, #kayitPanel, #urunDetayPanel { display: none; }
   </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
@@ -63,11 +63,30 @@
 
   <!-- ÜRÜNLER -->
   <main id="urunler" class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 hidden">
-    <!-- Ürün kartları buraya eklenecek JS ile -->
+    <!-- JS ile ürünler yüklenecek -->
   </main>
+
+  <!-- ÜRÜN DETAY PANELİ -->
+  <div id="urunDetayPanel" class="fixed inset-0 bg-white z-50 p-6 overflow-auto">
+    <button onclick="kapatDetay()" class="text-xl absolute top-4 right-6">&times;</button>
+    <div class="flex flex-col md:flex-row gap-6">
+      <img id="detayResim" src="" class="w-full md:w-1/2 object-cover rounded" />
+      <div>
+        <h2 id="detayBaslik" class="text-2xl font-bold mb-2"></h2>
+        <p id="detayAciklama" class="mb-4"></p>
+        <p id="detayFiyat" class="text-xl font-semibold text-green-700 mb-2"></p>
+        <p id="detayTarih" class="text-sm text-gray-600 mb-4"></p>
+        <button class="bg-blue-700 text-white px-4 py-2 rounded">Sipariş Ver</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     let users = { admin: 'admin1212' }, aktifKullanici = null;
+    let urunler = [
+      { id: 1, ad: "Erkek Ceket", aciklama: "Şık ve modern kesim.", fiyat: "599 TL", tarih: "24.06.2025", resim: "https://picsum.photos/id/1005/400/300" },
+      { id: 2, ad: "Kadın Kazak", aciklama: "Yumuşak doku, rahat kullanım.", fiyat: "399 TL", tarih: "22.06.2025", resim: "https://picsum.photos/id/1011/400/300" },
+    ];
 
     function girisPanelGoster() {
       document.getElementById('girisPanel').style.display = 'block';
@@ -98,6 +117,7 @@
         document.getElementById('urunler').classList.remove('hidden');
         toggleHesapPanel();
         if (k === 'admin') document.getElementById('adminPanelBtn').classList.remove('hidden');
+        urunleriYukle();
       } else alert('Hatalı bilgi');
     }
     function kayitOl() {
@@ -107,6 +127,35 @@
         alert('Kayıt başarılı');
         girisPanelGoster();
       } else alert('Geçersiz ya da mevcut kullanıcı');
+    }
+    function urunleriYukle() {
+      const container = document.getElementById('urunler');
+      container.innerHTML = '';
+      urunler.forEach(u => {
+        let div = document.createElement('div');
+        div.className = "bg-white shadow rounded overflow-hidden cursor-pointer";
+        div.onclick = () => urunDetayGoster(u);
+        div.innerHTML = `
+          <img src="${u.resim}" class="w-full h-48 object-cover" />
+          <div class="p-4">
+            <h3 class="text-lg font-bold">${u.ad}</h3>
+            <p class="text-sm text-gray-600">${u.aciklama}</p>
+            <p class="text-green-600 font-semibold mt-2">${u.fiyat}</p>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+    function urunDetayGoster(u) {
+      document.getElementById('urunDetayPanel').style.display = 'block';
+      document.getElementById('detayResim').src = u.resim;
+      document.getElementById('detayBaslik').textContent = u.ad;
+      document.getElementById('detayAciklama').textContent = u.aciklama;
+      document.getElementById('detayFiyat').textContent = u.fiyat;
+      document.getElementById('detayTarih').textContent = `Yüklenme Tarihi: ${u.tarih}`;
+    }
+    function kapatDetay() {
+      document.getElementById('urunDetayPanel').style.display = 'none';
     }
 
     // İl/ilçe örnek
