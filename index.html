@@ -77,7 +77,7 @@
         <p id="detayAciklama" class="mb-4"></p>
         <p id="detayFiyat" class="text-xl font-semibold text-green-700 mb-2"></p>
         <p id="detayTarih" class="text-sm text-gray-600 mb-4"></p>
-        <button class="bg-blue-700 text-white px-4 py-2 rounded">Sipariş Ver</button>
+        <button onclick="alert('Sipariş verildi!')" class="bg-blue-700 text-white px-4 py-2 rounded">Sipariş Ver</button>
       </div>
     </div>
   </div>
@@ -113,7 +113,8 @@
       document.getElementById('btnKayit').classList.remove('hidden');
       document.getElementById('btnHesap').classList.add('hidden');
       document.getElementById('urunler').classList.add('hidden');
-      document.getElementById('hesapPanel').classList.remove('active');
+      document.getElementById('adminPanelBtn').classList.add('hidden');
+      toggleHesapPanel();
     }
     function girisYap() {
       let k = document.getElementById('girisKullanici').value.trim(), s = document.getElementById('girisSifre').value;
@@ -126,6 +127,7 @@
         document.getElementById('kayitPanel').style.display = 'none';
         document.getElementById('urunler').classList.remove('hidden');
         if (k === 'admin') document.getElementById('adminPanelBtn').classList.remove('hidden');
+        toggleHesapPanel();
         urunleriYukle();
       } else alert('Hatalı bilgi');
     }
@@ -167,6 +169,7 @@
       document.getElementById('urunDetayPanel').classList.add('hidden');
     }
 
+    // İl/ilçe örnek
     const ilceler = {
       'İstanbul': ['Kadıköy', 'Beşiktaş', 'Üsküdar'],
       'Ankara': ['Çankaya', 'Keçiören', 'Sincan'],
