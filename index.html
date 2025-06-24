@@ -1,585 +1,137 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>HızlıAlış - E-Ticaret</title>
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-<style>
-  body { font-family: 'Poppins', sans-serif; background: #f3f4f6; }
-  #sidebarMenu { transition: transform 0.3s ease-in-out; }
-  #sidebarMenu.closed { transform: translateX(-100%); }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HızlıAlış</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <style>
+    body { font-family: 'Poppins', sans-serif; }
+    #hesapPanel { transition: transform 0.3s ease; transform: translateX(100%); }
+    #hesapPanel.active { transform: translateX(0); }
+    #girisPanel, #kayitPanel { display: none; }
+  </style>
 </head>
-<body class="min-h-screen bg-gray-100">
+<body class="bg-gray-100 min-h-screen flex flex-col">
 
-<header class="bg-blue-900 text-white p-4 flex justify-between items-center">
-  <h1 class="text-2xl font-bold cursor-pointer" onclick="location.reload()">HızlıAlış</h1>
-  <div>
-    <button id="btnLogin" class="mx-2 px-4 py-2 bg-blue-700 rounded hover:bg-blue-600">Giriş Yap</button>
-    <button id="btnRegister" class="mx-2 px-4 py-2 bg-green-700 rounded hover:bg-green-600">Kayıt Ol</button>
-    <button id="btnAccount" class="hidden relative mx-2 p-2 rounded-full hover:bg-blue-800" title="Hesabım">
-      <i class="fas fa-user-circle text-3xl"></i>
-    </button>
-  </div>
-</header>
+  <!-- HEADER -->
+  <header class="bg-blue-900 text-white p-4 flex justify-between items-center">
+    <h1 class="text-2xl font-bold">HızlıAlış</h1>
+    <nav id="topNav" class="flex items-center gap-3">
+      <button onclick="girisPanelGoster()" id="btnGiris" class="px-4 py-2 bg-blue-700 rounded hover:bg-blue-600">Giriş Yap</button>
+      <button onclick="kayitPanelGoster()" id="btnKayit" class="px-4 py-2 bg-green-700 rounded hover:bg-green-600">Kayıt Ol</button>
+      <button onclick="toggleHesapPanel()" id="btnHesap" class="hidden">
+        <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png" alt="Hesap" class="w-8 h-8 rounded-full">
+      </button>
+    </nav>
+  </header>
 
-<!-- Sidebar / Hesabım Panel -->
-<div id="sidebarMenu" class="fixed top-0 left-0 h-full w-72 bg-white shadow-lg z-50 closed flex flex-col">
-  <div class="flex justify-between items-center p-4 border-b">
-    <h2 class="text-xl font-semibold">Hesabım</h2>
-    <button id="btnSidebarClose" class="text-2xl font-bold">&times;</button>
-  </div>
-  <div class="p-4 flex-grow overflow-auto" id="accountContent">
-    <!-- Kullanıcı bilgileri ve admin panel butonu buraya gelecek -->
-  </div>
-  <button id="btnLogout" class="bg-red-600 hover:bg-red-700 text-white py-2 m-4 rounded">Çıkış Yap</button>
-</div>
-
-<main class="container mx-auto p-6">
-
-  <!-- Giriş Paneli -->
-  <section id="loginSection" class="max-w-md mx-auto bg-white rounded shadow p-6">
-    <h2 class="text-xl font-semibold mb-4">Giriş Yap</h2>
-    <input type="text" id="loginUsername" placeholder="Kullanıcı Adı" class="w-full mb-3 p-2 border rounded" autocomplete="username" />
-    <input type="password" id="loginPassword" placeholder="Şifre" class="w-full mb-3 p-2 border rounded" autocomplete="current-password" />
-    <button id="btnLoginSubmit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-500">Giriş Yap</button>
-    <p class="mt-4 text-center text-sm text-gray-600">Hesabınız yok mu? <button id="showRegister" class="text-blue-700 hover:underline">Kayıt Ol</button></p>
+  <!-- GİRİŞ PANELİ -->
+  <section id="girisPanel" class="p-4">
+    <h2 class="text-xl font-bold mb-2">Giriş Yap</h2>
+    <input id="girisKullanici" type="text" placeholder="Kullanıcı Adı" class="border p-2 mb-2 w-full" />
+    <input id="girisSifre" type="password" placeholder="Şifre" class="border p-2 mb-2 w-full" />
+    <button onclick="girisYap()" class="bg-blue-700 text-white px-4 py-2 rounded">Giriş Yap</button>
   </section>
 
-  <!-- Kayıt Paneli -->
-  <section id="registerSection" class="max-w-md mx-auto bg-white rounded shadow p-6 hidden">
-    <h2 class="text-xl font-semibold mb-4">Kayıt Ol</h2>
-    <input type="text" id="registerUsername" placeholder="Kullanıcı Adı" class="w-full mb-3 p-2 border rounded" autocomplete="username" />
-    <input type="password" id="registerPassword" placeholder="Şifre" class="w-full mb-3 p-2 border rounded" autocomplete="new-password" />
-    <select id="registerCity" class="w-full mb-3 p-2 border rounded">
-      <option value="">İl Seçin</option>
-    </select>
-    <select id="registerDistrict" class="w-full mb-3 p-2 border rounded" disabled>
-      <option value="">İlçe Seçin</option>
-    </select>
-    <input type="text" id="registerAddress" placeholder="Açık Adres" class="w-full mb-3 p-2 border rounded" />
-    <input type="text" id="registerPostalCode" placeholder="Posta Kodu" class="w-full mb-3 p-2 border rounded" />
-    <input type="text" id="registerPhone" placeholder="Telefon Numarası" class="w-full mb-3 p-2 border rounded" />
-    <button id="btnRegisterSubmit" class="w-full bg-green-600 text-white p-2 rounded hover:bg-green-500">Kayıt Ol</button>
-    <p class="mt-4 text-center text-sm text-gray-600">Zaten hesabınız var mı? <button id="showLogin" class="text-blue-700 hover:underline">Giriş Yap</button></p>
+  <!-- KAYIT PANELİ -->
+  <section id="kayitPanel" class="p-4">
+    <h2 class="text-xl font-bold mb-2">Kayıt Ol</h2>
+    <input id="kayitKullanici" type="text" placeholder="Kullanıcı Adı" class="border p-2 mb-2 w-full" />
+    <input id="kayitSifre" type="password" placeholder="Şifre" class="border p-2 mb-2 w-full" />
+    <input id="kayitTel" type="tel" placeholder="Telefon" class="border p-2 mb-2 w-full" />
+    <select id="kayitIl" class="border p-2 mb-2 w-full"></select>
+    <select id="kayitIlce" class="border p-2 mb-2 w-full"></select>
+    <input id="kayitAdres" type="text" placeholder="Açık Adres" class="border p-2 mb-2 w-full" />
+    <input id="kayitPosta" type="text" placeholder="Posta Kodu" class="border p-2 mb-2 w-full" />
+    <button onclick="kayitOl()" class="bg-green-700 text-white px-4 py-2 rounded">Kayıt Ol</button>
   </section>
 
-  <!-- Ürünler -->
-  <section id="productsSection" class="mt-10 max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-    <!-- Ürün kartları JS ile eklenecek -->
-  </section>
-
-  <!-- Kullanıcı siparişleri -->
-  <section id="ordersSection" class="max-w-4xl mx-auto mt-10 hidden">
-    <h2 class="text-2xl font-semibold mb-6">Siparişlerim</h2>
-    <div id="activeOrders" class="mb-6">
-      <h3 class="text-xl font-semibold mb-2">Aktif Siparişler</h3>
-      <div class="space-y-2" id="activeOrdersList"></div>
+  <!-- HESAP PANELİ -->
+  <aside id="hesapPanel" class="fixed top-0 right-0 w-64 h-full bg-white shadow-lg z-50 p-4 flex flex-col">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-semibold">Hesabım</h2>
+      <button onclick="toggleHesapPanel()" class="text-2xl">&times;</button>
     </div>
-    <div id="pastOrders">
-      <h3 class="text-xl font-semibold mb-2">Geçmiş Siparişler</h3>
-      <div class="space-y-2" id="pastOrdersList"></div>
+    <div id="hesapBilgi" class="flex-1 overflow-y-auto">
+      <p class="mb-2 font-medium">Hoş geldiniz!</p>
     </div>
-  </section>
+    <button id="adminPanelBtn" onclick="adminPanelGoster()" class="hidden bg-purple-700 text-white px-4 py-2 mt-2 rounded">Admin Panel</button>
+    <button onclick="cikisYap()" class="mt-auto bg-red-600 text-white px-4 py-2 rounded hover:bg-red-500">Çıkış Yap</button>
+  </aside>
 
-  <!-- Admin Panel -->
-  <section id="adminPanel" class="max-w-7xl mx-auto mt-10 hidden">
-    <h2 class="text-2xl font-semibold mb-6">Admin Panel</h2>
-    <div class="overflow-auto max-h-[600px]">
-      <table class="min-w-full border border-gray-300 text-left">
-        <thead class="bg-blue-800 text-white">
-          <tr>
-            <th class="p-3 border border-gray-300">Kullanıcı</th>
-            <th class="p-3 border border-gray-300">Bakiye (TL)</th>
-            <th class="p-3 border border-gray-300">Bakiye Güncelle</th>
-            <th class="p-3 border border-gray-300">Siparişler & Durumları</th>
-            <th class="p-3 border border-gray-300">Sipariş Durumunu Güncelle</th>
-          </tr>
-        </thead>
-        <tbody id="adminUserTableBody"></tbody>
-      </table>
-    </div>
-  </section>
+  <!-- ÜRÜNLER -->
+  <main id="urunler" class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 hidden">
+    <!-- Ürün kartları buraya eklenecek JS ile -->
+  </main>
 
-</main>
+  <script>
+    let users = { admin: 'admin1212' }, aktifKullanici = null;
 
-<footer class="bg-blue-900 text-white text-center p-4 mt-10">
-  <p>&copy; 2025 HızlıAlış</p>
-</footer>
-
-<script>
-  // İl ve İlçe verileri
-  const citiesAndDistricts = {
-    "İstanbul": ["Kadıköy", "Üsküdar", "Beşiktaş", "Bakırköy", "Sarıyer"],
-    "Ankara": ["Çankaya", "Keçiören", "Mamak", "Altındağ", "Yenimahalle"],
-    "İzmir": ["Konak", "Karşıyaka", "Bornova", "Buca", "Gaziemir"],
-    // ...81 ilin tamamı eklenebilir
-  };
-
-  // Ürün listesi
-  const products = [
-    {id:1, name:"Telefon X1", price:15000, desc:"Yüksek performanslı, şık tasarımlı telefon.", images:["https://via.placeholder.com/400x250?text=Telefon+X1"]},
-    {id:2, name:"Kulaklık Pro", price:500, desc:"Konforlu, kaliteli ses deneyimi.", images:["https://via.placeholder.com/400x250?text=Kulaklık+Pro"]},
-    {id:3, name:"Klavye Deluxe", price:1000, desc:"Ergonomik, dayanıklı klavye.", images:["https://via.placeholder.com/400x250?text=Klavye+Deluxe"]},
-    {id:4, name:"Saat Elegance", price:2500, desc:"Şık tasarımlı ve dayanıklı kol saati.", images:["https://via.placeholder.com/400x250?text=Saat+Elegance"]},
-    {id:5, name:"Spor Ayakkabı", price:1200, desc:"Konforlu ve dayanıklı spor ayakkabı.", images:["https://via.placeholder.com/400x250?text=Spor+Ayakkabı"]},
-    {id:6, name:"Sırt Çantası", price:800, desc:"Dayanıklı ve şık sırt çantası.", images:["https://via.placeholder.com/400x250?text=Sırt+Çantası"]},
-    {id:7, name:"Bluetooth Hoparlör", price:700, desc:"Taşınabilir, kaliteli ses hoparlörü.", images:["https://via.placeholder.com/400x250?text=Bluetooth+Hoparlör"]},
-    {id:8, name:"Kitap Okuyucu", price:950, desc:"E-kitap okuyucu cihazı, hafif ve kullanışlı.", images:["https://via.placeholder.com/400x250?text=Kitap+Okuyucu"]},
-    {id:9, name:"Dijital Kamera", price:3000, desc:"Yüksek çözünürlüklü dijital fotoğraf makinesi.", images:["https://via.placeholder.com/400x250?text=Dijital+Kamera"]},
-    {id:10, name:"Fitness Bilekliği", price:600, desc:"Adım sayar ve kalp ritmi ölçer bileklik.", images:["https://via.placeholder.com/400x250?text=Fitness+Bilekliği"]}
-  ];
-
-  // Kullanıcı verileri (localStorage)
-  let users = JSON.parse(localStorage.getItem('users')) || {"admin":"admin1212"};
-  let balances = JSON.parse(localStorage.getItem('balances')) || {"admin":0};
-  let addresses = JSON.parse(localStorage.getItem('addresses')) || {"admin":{}};
-  let orders = JSON.parse(localStorage.getItem('orders')) || {"admin":[]};
-  let orderStatuses = JSON.parse(localStorage.getItem('orderStatuses')) || {"admin":[]};
-
-  // Aktif kullanıcı
-  let currentUser = null;
-
-  // Element referansları
-  const loginSection = document.getElementById('loginSection');
-  const registerSection = document.getElementById('registerSection');
-  const btnLogin = document.getElementById('btnLogin');
-  const btnRegister = document.getElementById('btnRegister');
-  const btnAccount = document.getElementById('btnAccount');
-  const sidebarMenu = document.getElementById('sidebarMenu');
-  const btnSidebarClose = document.getElementById('btnSidebarClose');
-  const accountContent = document.getElementById('accountContent');
-  const btnLogout = document.getElementById('btnLogout');
-  const productsSection = document.getElementById('productsSection');
-  const ordersSection = document.getElementById('ordersSection');
-  const activeOrdersList = document.getElementById('activeOrdersList');
-  const pastOrdersList = document.getElementById('pastOrdersList');
-  const adminPanel = document.getElementById('adminPanel');
-  const adminUserTableBody = document.getElementById('adminUserTableBody');
-  const btnLoginSubmit = document.getElementById('btnLoginSubmit');
-  const btnRegisterSubmit = document.getElementById('btnRegisterSubmit');
-  const showRegister = document.getElementById('showRegister');
-  const showLogin = document.getElementById('showLogin');
-  const loginUsername = document.getElementById('loginUsername');
-  const loginPassword = document.getElementById('loginPassword');
-  const registerUsername = document.getElementById('registerUsername');
-  const registerPassword = document.getElementById('registerPassword');
-  const registerCity = document.getElementById('registerCity');
-  const registerDistrict = document.getElementById('registerDistrict');
-  const registerAddress = document.getElementById('registerAddress');
-  const registerPostalCode = document.getElementById('registerPostalCode');
-  const registerPhone = document.getElementById('registerPhone');
-
-  // Başlangıçta
-  window.onload = () => {
-    populateCities();
-    renderProducts();
-  };
-
-  // İl dropdown doldur
-  function populateCities() {
-    for(let city in citiesAndDistricts) {
-      let option = document.createElement('option');
-      option.value = city;
-      option.textContent = city;
-      registerCity.appendChild(option);
+    function girisPanelGoster() {
+      document.getElementById('girisPanel').style.display = 'block';
+      document.getElementById('kayitPanel').style.display = 'none';
     }
-  }
-
-  // İlçe dropdown doldur
-  registerCity.addEventListener('change', () => {
-    const selectedCity = registerCity.value;
-    registerDistrict.innerHTML = '<option value="">İlçe Seçin</option>';
-    registerDistrict.disabled = true;
-    if(selectedCity && citiesAndDistricts[selectedCity]) {
-      citiesAndDistricts[selectedCity].forEach(district => {
-        let option = document.createElement('option');
-        option.value = district;
-        option.textContent = district;
-        registerDistrict.appendChild(option);
-      });
-      registerDistrict.disabled = false;
+    function kayitPanelGoster() {
+      document.getElementById('kayitPanel').style.display = 'block';
+      document.getElementById('girisPanel').style.display = 'none';
     }
-  });
+    function toggleHesapPanel() {
+      document.getElementById('hesapPanel').classList.toggle('active');
+    }
+    function cikisYap() {
+      aktifKullanici = null;
+      document.getElementById('btnGiris').classList.remove('hidden');
+      document.getElementById('btnKayit').classList.remove('hidden');
+      document.getElementById('btnHesap').classList.add('hidden');
+      document.getElementById('urunler').classList.add('hidden');
+      toggleHesapPanel();
+    }
+    function girisYap() {
+      let k = document.getElementById('girisKullanici').value.trim(), s = document.getElementById('girisSifre').value;
+      if (users[k] === s) {
+        aktifKullanici = k;
+        document.getElementById('btnGiris').classList.add('hidden');
+        document.getElementById('btnKayit').classList.add('hidden');
+        document.getElementById('btnHesap').classList.remove('hidden');
+        document.getElementById('urunler').classList.remove('hidden');
+        toggleHesapPanel();
+        if (k === 'admin') document.getElementById('adminPanelBtn').classList.remove('hidden');
+      } else alert('Hatalı bilgi');
+    }
+    function kayitOl() {
+      let k = document.getElementById('kayitKullanici').value.trim(), s = document.getElementById('kayitSifre').value;
+      if (k && s && !users[k]) {
+        users[k] = s;
+        alert('Kayıt başarılı');
+        girisPanelGoster();
+      } else alert('Geçersiz ya da mevcut kullanıcı');
+    }
 
-  // Ürünleri göster
-  function renderProducts() {
-    productsSection.innerHTML = '';
-    products.forEach(product => {
-      const card = document.createElement('div');
-      card.className = "bg-white rounded shadow p-4 cursor-pointer hover:shadow-lg transition";
-      card.innerHTML = `
-        <img src="${product.images[0]}" alt="${product.name}" class="w-full h-48 object-cover rounded mb-3" />
-        <h3 class="text-lg font-semibold mb-1">${product.name}</h3>
-        <p class="text-blue-700 font-bold mb-2">${product.price.toLocaleString()} TL</p>
-        <p class="text-gray-600 text-sm">${product.desc}</p>
-      `;
-      card.onclick = () => showProductDetail(product.id);
-      productsSection.appendChild(card);
-    });
-  }
-
-  // Ürün detay görünümü (modal)
-  function showProductDetail(productId) {
-    const product = products.find(p => p.id === productId);
-    if(!product) return alert("Ürün bulunamadı!");
-
-    // Modal HTML
-    const modalHtml = `
-      <div id="productModal" class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-60">
-        <div class="bg-white rounded-lg max-w-5xl w-full p-6 relative max-h-[90vh] overflow-auto">
-          <button id="modalCloseBtn" class="absolute top-3 right-3 text-2xl font-bold hover:text-red-600">&times;</button>
-          <div class="flex flex-col md:flex-row gap-6">
-            <div class="md:w-1/2 flex flex-col space-y-4">
-              ${product.images.map(img => `<img src="${img}" alt="${product.name}" class="rounded w-full object-contain max-h-60" />`).join('')}
-            </div>
-            <div class="md:w-1/2 flex flex-col">
-              <h2 class="text-2xl font-semibold mb-2">${product.name}</h2>
-              <p class="text-gray-700 mb-4">${product.desc}</p>
-              <p class="text-xl font-bold mb-2">${product.price.toLocaleString()} TL</p>
-              <p class="text-sm text-gray-500 mb-6">Eklenme Tarihi: ${new Date().toLocaleDateString()}</p>
-              <button id="orderProductBtn" class="bg-yellow-500 text-white py-2 rounded hover:bg-yellow-400">Sipariş Ver</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-
-    document.getElementById('modalCloseBtn').onclick = () => {
-      document.getElementById('productModal').remove();
+    // İl/ilçe örnek
+    const ilceler = {
+      'İstanbul': ['Kadıköy', 'Beşiktaş', 'Üsküdar'],
+      'Ankara': ['Çankaya', 'Keçiören', 'Sincan'],
     };
-
-    document.getElementById('orderProductBtn').onclick = () => {
-      if(!currentUser || currentUser === 'admin') {
-        alert('Lütfen müşteri hesabınızla giriş yapınız.');
-        document.getElementById('productModal').remove();
-        return;
-      }
-      siparisVer(product.id);
-      document.getElementById('productModal').remove();
-    };
-  }
-
-  // Sipariş verme fonksiyonu
-  function siparisVer(productId) {
-    const product = products.find(p => p.id === productId);
-    if(!product) return alert('Ürün bulunamadı.');
-    if(balances[currentUser] === undefined) balances[currentUser] = 100; // İlk bakiye
-
-    if(balances[currentUser] < product.price) {
-      alert('Yetersiz bakiye! Lütfen bakiye yükleyin.');
-      return;
-    }
-    balances[currentUser] -= product.price;
-
-    if(!orders[currentUser]) orders[currentUser] = [];
-    if(!orderStatuses[currentUser]) orderStatuses[currentUser] = [];
-
-    orders[currentUser].push({
-      productId: product.id,
-      productName: product.name,
-      price: product.price,
-      date: new Date().toISOString(),
-      status: 'Sipariş Alındı'
+    const selectIl = document.getElementById('kayitIl');
+    const selectIlce = document.getElementById('kayitIlce');
+    Object.keys(ilceler).forEach(il => {
+      let opt = document.createElement('option');
+      opt.value = il;
+      opt.textContent = il;
+      selectIl.appendChild(opt);
     });
-    orderStatuses[currentUser].push('Sipariş Alındı');
-
-    // LocalStorage güncelle
-    localStorage.setItem('balances', JSON.stringify(balances));
-    localStorage.setItem('orders', JSON.stringify(orders));
-    localStorage.setItem('orderStatuses', JSON.stringify(orderStatuses));
-
-    alert('Siparişiniz alındı. Kalan bakiyeniz: ' + balances[currentUser].toLocaleString() + ' TL');
-    renderOrders();
-  }
-
-  // Siparişleri göster (kullanıcı)
-  function renderOrders() {
-    ordersSection.classList.remove('hidden');
-    activeOrdersList.innerHTML = '';
-    pastOrdersList.innerHTML = '';
-
-    const userOrders = orders[currentUser] || [];
-    userOrders.forEach(order => {
-      const isDelivered = order.status === 'Teslim Edildi';
-      const container = isDelivered ? pastOrdersList : activeOrdersList;
-      const orderDiv = document.createElement('div');
-      orderDiv.className = `p-3 rounded shadow ${isDelivered ? 'bg-green-100' : 'bg-yellow-100'}`;
-      orderDiv.innerHTML = `
-        <div><strong>${order.productName}</strong> - ${order.price.toLocaleString()} TL</div>
-        <div>Tarih: ${new Date(order.date).toLocaleDateString()}</div>
-        <div>Durum: ${order.status}</div>
-      `;
-      container.appendChild(orderDiv);
-    });
-  }
-
-  // Giriş ve kayıt panelleri toggle
-  btnLogin.addEventListener('click', () => {
-    loginSection.classList.remove('hidden');
-    registerSection.classList.add('hidden');
-  });
-  btnRegister.addEventListener('click', () => {
-    registerSection.classList.remove('hidden');
-    loginSection.classList.add('hidden');
-  });
-  showRegister.addEventListener('click', () => {
-    loginSection.classList.add('hidden');
-    registerSection.classList.remove('hidden');
-  });
-  showLogin.addEventListener('click', () => {
-    registerSection.classList.add('hidden');
-    loginSection.classList.remove('hidden');
-  });
-
-  // Kayıt olma fonksiyonu
-  btnRegisterSubmit.addEventListener('click', () => {
-    const username = registerUsername.value.trim();
-    const password = registerPassword.value.trim();
-    const city = registerCity.value;
-    const district = registerDistrict.value;
-    const address = registerAddress.value.trim();
-    const postalCode = registerPostalCode.value.trim();
-    const phone = registerPhone.value.trim();
-
-    if (!username || !password || !city || !district || !address || !postalCode || !phone) {
-      alert('Lütfen tüm alanları doldurun.');
-      return;
-    }
-    if(users[username]) {
-      alert('Bu kullanıcı adı zaten alınmış.');
-      return;
-    }
-
-    users[username] = password;
-    balances[username] = 100; // Başlangıç bakiyesi
-    addresses[username] = { city, district, address, postalCode, phone };
-    orders[username] = [];
-    orderStatuses[username] = [];
-
-    localStorage.setItem('users', JSON.stringify(users));
-    localStorage.setItem('balances', JSON.stringify(balances));
-    localStorage.setItem('addresses', JSON.stringify(addresses));
-    localStorage.setItem('orders', JSON.stringify(orders));
-    localStorage.setItem('orderStatuses', JSON.stringify(orderStatuses));
-
-    alert('Kayıt başarılı! Şimdi giriş yapabilirsiniz.');
-
-    // Temizle ve giriş paneline dön
-    registerUsername.value = '';
-    registerPassword.value = '';
-    registerCity.value = '';
-    registerDistrict.innerHTML = '<option value="">İlçe Seçin</option>';
-    registerDistrict.disabled = true;
-    registerAddress.value = '';
-    registerPostalCode.value = '';
-    registerPhone.value = '';
-
-    registerSection.classList.add('hidden');
-    loginSection.classList.remove('hidden');
-  });
-
-  // Giriş yapma fonksiyonu
-  btnLoginSubmit.addEventListener('click', () => {
-    const username = loginUsername.value.trim();
-    const password = loginPassword.value.trim();
-
-    if (!username || !password) {
-      alert('Lütfen kullanıcı adı ve şifre girin.');
-      return;
-    }
-    if (users[username] !== password) {
-      alert('Kullanıcı adı veya şifre yanlış.');
-      return;
-    }
-    currentUser = username;
-
-    // Giriş sonrası arayüz güncelle
-    loginSection.classList.add('hidden');
-    registerSection.classList.add('hidden');
-    btnLogin.classList.add('hidden');
-    btnRegister.classList.add('hidden');
-    btnAccount.classList.remove('hidden');
-    ordersSection.classList.remove('hidden');
-    renderOrders();
-    renderAccountSidebar();
-    renderAdminPanelIfNeeded();
-
-    // Temizle
-    loginUsername.value = '';
-    loginPassword.value = '';
-
-    alert('Giriş başarılı. Hoşgeldiniz, ' + currentUser + '!');
-  });
-
-  // Sidebar açma-kapama
-  btnAccount.addEventListener('click', () => {
-    sidebarMenu.classList.remove('closed');
-  });
-  btnSidebarClose.addEventListener('click', () => {
-    sidebarMenu.classList.add('closed');
-  });
-
-  // Sidebar içeriği oluşturma
-  function renderAccountSidebar() {
-    let html = `<p class="mb-4">Hoşgeldin, <strong>${currentUser}</strong></p>`;
-    if(currentUser !== 'admin') {
-      const addr = addresses[currentUser];
-      html += `
-        <div class="mb-4 text-sm text-gray-700">
-          <div><strong>Adres:</strong> ${addr.city}, ${addr.district}</div>
-          <div>${addr.address}</div>
-          <div><strong>Posta Kodu:</strong> ${addr.postalCode}</div>
-          <div><strong>Telefon:</strong> ${addr.phone}</div>
-          <div><strong>Bakiye:</strong> ${balances[currentUser].toLocaleString()} TL</div>
-        </div>
-      `;
-    }
-    html += `<button id="btnAdminPanelOpen" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-500 ${currentUser !== 'admin' ? 'hidden' : ''} mb-4">Admin Panel</button>`;
-    accountContent.innerHTML = html;
-
-    // Admin panel butonuna event ekle
-    if(currentUser === 'admin') {
-      document.getElementById('btnAdminPanelOpen').addEventListener('click', () => {
-        adminPanel.classList.remove('hidden');
-        ordersSection.classList.add('hidden');
-        sidebarMenu.classList.add('closed');
+    selectIl.addEventListener('change', () => {
+      selectIlce.innerHTML = '';
+      ilceler[selectIl.value].forEach(ilce => {
+        let opt = document.createElement('option');
+        opt.value = ilce;
+        opt.textContent = ilce;
+        selectIlce.appendChild(opt);
       });
-    }
-  }
-
-  // Admin panel içeriği oluşturma
-  function renderAdminPanelIfNeeded() {
-    if(currentUser === 'admin') {
-      adminPanel.classList.remove('hidden');
-      ordersSection.classList.add('hidden');
-      renderAdminUsers();
-    } else {
-      adminPanel.classList.add('hidden');
-    }
-  }
-
-  function renderAdminUsers() {
-    adminUserTableBody.innerHTML = '';
-    for(let user in users) {
-      if(user === 'admin') continue;
-      const tr = document.createElement('tr');
-      tr.className = "border border-gray-300";
-
-      // Kullanıcı adı
-      const tdUser = document.createElement('td');
-      tdUser.className = "p-3 border border-gray-300";
-      tdUser.textContent = user;
-      tr.appendChild(tdUser);
-
-      // Bakiye
-      const tdBalance = document.createElement('td');
-      tdBalance.className = "p-3 border border-gray-300";
-      tdBalance.textContent = balances[user]?.toLocaleString() ?? '0';
-      tr.appendChild(tdBalance);
-
-      // Bakiye güncelle input+button
-      const tdBalanceUpdate = document.createElement('td');
-      tdBalanceUpdate.className = "p-3 border border-gray-300";
-      const inputBalance = document.createElement('input');
-      inputBalance.type = 'number';
-      inputBalance.min = '0';
-      inputBalance.value = balances[user] ?? 0;
-      inputBalance.className = "border rounded p-1 w-20 mr-2";
-      const btnUpdateBalance = document.createElement('button');
-      btnUpdateBalance.textContent = 'Güncelle';
-      btnUpdateBalance.className = 'bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-500';
-      btnUpdateBalance.onclick = () => {
-        const val = Number(inputBalance.value);
-        if(isNaN(val) || val < 0) {
-          alert('Geçerli bir bakiye girin.');
-          return;
-        }
-        balances[user] = val;
-        localStorage.setItem('balances', JSON.stringify(balances));
-        renderAdminUsers();
-      };
-      tdBalanceUpdate.appendChild(inputBalance);
-      tdBalanceUpdate.appendChild(btnUpdateBalance);
-      tr.appendChild(tdBalanceUpdate);
-
-      // Siparişler ve durumları
-      const tdOrders = document.createElement('td');
-      tdOrders.className = "p-3 border border-gray-300 max-w-xs overflow-auto max-h-48";
-      const userOrders = orders[user] || [];
-      if(userOrders.length === 0) tdOrders.textContent = 'Yok';
-      else {
-        userOrders.forEach((order, idx) => {
-          const div = document.createElement('div');
-          div.className = "mb-1";
-          div.innerHTML = `<strong>${order.productName}</strong> (${order.price.toLocaleString()} TL) - Durum: ${order.status}`;
-          tdOrders.appendChild(div);
-        });
-      }
-      tr.appendChild(tdOrders);
-
-      // Sipariş durum güncelleme (select + button)
-      const tdOrderStatusUpdate = document.createElement('td');
-      tdOrderStatusUpdate.className = "p-3 border border-gray-300";
-
-      const selectStatus = document.createElement('select');
-      selectStatus.className = "border rounded p-1 w-full mb-2";
-      selectStatus.innerHTML = `
-        <option value="">Durum Seçin</option>
-        <option value="Sipariş Alındı">Sipariş Alındı</option>
-        <option value="Hazırlanıyor">Hazırlanıyor</option>
-        <option value="Kargoda">Kargoda</option>
-        <option value="Teslim Edildi">Teslim Edildi</option>
-        <option value="İptal Edildi">İptal Edildi</option>
-      `;
-
-      const btnUpdateStatus = document.createElement('button');
-      btnUpdateStatus.textContent = "Güncelle";
-      btnUpdateStatus.className = "bg-green-600 text-white px-2 py-1 rounded hover:bg-green-500";
-      btnUpdateStatus.onclick = () => {
-        const selStatus = selectStatus.value;
-        if(!selStatus) {
-          alert('Durum seçin!');
-          return;
-        }
-        if(!orders[user] || orders[user].length === 0) {
-          alert('Bu kullanıcıda sipariş yok.');
-          return;
-        }
-        // Tüm siparişlerin durumunu güncelle (basit tutuyoruz)
-        for(let i=0; i<orders[user].length; i++) {
-          orders[user][i].status = selStatus;
-        }
-        localStorage.setItem('orders', JSON.stringify(orders));
-        renderAdminUsers();
-      };
-
-      tdOrderStatusUpdate.appendChild(selectStatus);
-      tdOrderStatusUpdate.appendChild(btnUpdateStatus);
-      tr.appendChild(tdOrderStatusUpdate);
-
-      adminUserTableBody.appendChild(tr);
-    }
-  }
-
-  // Çıkış yap
-  btnLogout.addEventListener('click', () => {
-    currentUser = null;
-    btnLogin.classList.remove('hidden');
-    btnRegister.classList.remove('hidden');
-    btnAccount.classList.add('hidden');
-    sidebarMenu.classList.add('closed');
-    adminPanel.classList.add('hidden');
-    ordersSection.classList.add('hidden');
-    accountContent.innerHTML = '';
-    alert('Çıkış yapıldı.');
-  });
-
-</script>
+    });
+  </script>
 
 </body>
 </html>
