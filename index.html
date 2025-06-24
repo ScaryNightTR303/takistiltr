@@ -11,9 +11,10 @@
     #hesapPanel { transition: transform 0.3s ease; transform: translateX(100%); }
     #hesapPanel.active { transform: translateX(0); }
     #girisPanel, #kayitPanel, #urunDetayPanel { display: none; }
+    html, body { scroll-behavior: smooth; }
   </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
+<body class="bg-gray-100 min-h-screen flex flex-col overflow-y-auto">
 
   <!-- HEADER -->
   <header class="bg-blue-900 text-white p-4 flex justify-between items-center">
@@ -67,7 +68,7 @@
   </main>
 
   <!-- ÜRÜN DETAY PANELİ -->
-  <div id="urunDetayPanel" class="fixed inset-0 bg-white z-50 p-6 overflow-auto">
+  <div id="urunDetayPanel" class="fixed inset-0 bg-white z-50 p-6 overflow-auto hidden">
     <button onclick="kapatDetay()" class="text-xl absolute top-4 right-6">&times;</button>
     <div class="flex flex-col md:flex-row gap-6">
       <img id="detayResim" src="" class="w-full md:w-1/2 object-cover rounded" />
@@ -83,10 +84,17 @@
 
   <script>
     let users = { admin: 'admin1212' }, aktifKullanici = null;
-    let urunler = [
-      { id: 1, ad: "Erkek Ceket", aciklama: "Şık ve modern kesim.", fiyat: "599 TL", tarih: "24.06.2025", resim: "https://picsum.photos/id/1005/400/300" },
-      { id: 2, ad: "Kadın Kazak", aciklama: "Yumuşak doku, rahat kullanım.", fiyat: "399 TL", tarih: "22.06.2025", resim: "https://picsum.photos/id/1011/400/300" },
-    ];
+    let urunler = [];
+    for (let i = 1; i <= 12; i++) {
+      urunler.push({
+        id: i,
+        ad: `Ürün ${i}`,
+        aciklama: `Bu ürün ${i} açıklamasıdır.`,
+        fiyat: `${100 + i * 10} TL`,
+        tarih: `24.06.2025`,
+        resim: `https://picsum.photos/seed/${i}/400/300`
+      });
+    }
 
     function girisPanelGoster() {
       document.getElementById('girisPanel').style.display = 'block';
@@ -114,6 +122,8 @@
         document.getElementById('btnGiris').classList.add('hidden');
         document.getElementById('btnKayit').classList.add('hidden');
         document.getElementById('btnHesap').classList.remove('hidden');
+        document.getElementById('girisPanel').style.display = 'none';
+        document.getElementById('kayitPanel').style.display = 'none';
         document.getElementById('urunler').classList.remove('hidden');
         toggleHesapPanel();
         if (k === 'admin') document.getElementById('adminPanelBtn').classList.remove('hidden');
@@ -147,7 +157,7 @@
       });
     }
     function urunDetayGoster(u) {
-      document.getElementById('urunDetayPanel').style.display = 'block';
+      document.getElementById('urunDetayPanel').classList.remove('hidden');
       document.getElementById('detayResim').src = u.resim;
       document.getElementById('detayBaslik').textContent = u.ad;
       document.getElementById('detayAciklama').textContent = u.aciklama;
@@ -155,7 +165,7 @@
       document.getElementById('detayTarih').textContent = `Yüklenme Tarihi: ${u.tarih}`;
     }
     function kapatDetay() {
-      document.getElementById('urunDetayPanel').style.display = 'none';
+      document.getElementById('urunDetayPanel').classList.add('hidden');
     }
 
     // İl/ilçe örnek
