@@ -1,65 +1,767 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <title>MottoTrend Kopya</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MottoTrend Klon - Shopier</title>
+<style>
+  /* Reset */
+  * {
+    box-sizing: border-box;
+    margin: 0; padding: 0;
+  }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #fff;
+    color: #222;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+  header {
+    background: #003366;
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  header .logo {
+    font-weight: 900;
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+  }
+  nav {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  nav button {
+    background: #007bff;
+    border: none;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  nav button:hover {
+    background: #0056b3;
+  }
+  nav button svg {
+    width: 18px;
+    height: 18px;
+  }
+  main {
+    flex-grow: 1;
+    padding: 20px;
+    max-width: 1200px;
+    margin: auto;
+  }
+  .products {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+    gap: 20px;
+  }
+  .product-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fefefe;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.3s ease;
+  }
+  .product-card:hover {
+    box-shadow: 0 0 12px rgba(0,0,0,0.2);
+  }
+  .product-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: contain;
+    background: #fff;
+  }
+  .product-info {
+    padding: 12px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .product-title {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 6px;
+    flex-grow: 1;
+  }
+  .product-price {
+    color: #e60023;
+    font-weight: 700;
+    margin-bottom: 12px;
+    font-size: 1.1rem;
+  }
+  .add-cart-btn {
+    background: #e60023;
+    border: none;
+    color: white;
+    padding: 10px 0;
+    border-radius: 4px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  .add-cart-btn:hover {
+    background: #b00018;
+  }
+  /* Modal */
+  .modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 15px;
+  }
+  .modal-bg.active {
+    display: flex;
+  }
+  .modal {
+    background: white;
+    border-radius: 10px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 20px;
+    position: relative;
+  }
+  .modal h2 {
+    margin-bottom: 15px;
+  }
+  .close-btn {
+    position: absolute;
+    top: 10px; right: 15px;
+    background: transparent;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: #666;
+  }
+  /* Cart Items */
+  .cart-items {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+  }
+  .cart-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+  }
+  .cart-item img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    margin-right: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+  }
+  .cart-item-info {
+    flex-grow: 1;
+  }
+  .cart-item-title {
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .cart-item-qty {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .qty-btn {
+    background: #007bff;
+    border: none;
+    color: white;
+    width: 24px;
+    height: 24px;
+    font-weight: 700;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .qty-num {
+    min-width: 20px;
+    text-align: center;
+  }
+  .remove-btn {
+    background: transparent;
+    border: none;
+    color: #e60023;
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: 10px;
+    font-size: 20px;
+    line-height: 1;
+  }
+  /* Form */
+  form label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  form input, form select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+  }
+  form button.submit-btn {
+    background: #28a745;
+    border: none;
+    color: white;
+    padding: 10px 0;
+    font-weight: 700;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+  }
+  form button.submit-btn:hover {
+    background: #218838;
+  }
+  /* Footer */
+  footer {
+    background: #003366;
+    color: white;
+    padding: 20px;
+    margin-top: auto;
+  }
+  footer .footer-content {
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  footer .contact-info {
+    flex: 1 1 300px;
+  }
+  footer .admin-login {
+    flex: 1 1 300px;
+  }
+  footer .admin-login button {
+    background: #007bff;
+    border: none;
+    padding: 10px 15px;
+    font-weight: 700;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+  }
+  footer .admin-login button:hover {
+    background: #0056b3;
+  }
+  /* Login Modal */
+  #loginForm input {
+    margin-bottom: 12px;
+  }
+  /* Admin Panel */
+  #adminPanel {
+    max-width: 900px;
+    margin: auto;
+  }
+  #adminPanel h3 {
+    margin-bottom: 15px;
+    text-align: center;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    text-align: left;
+  }
+  th {
+    background: #003366;
+    color: white;
+  }
+  select.status-select {
+    padding: 5px;
+    border-radius: 4px;
+  }
+  /* Responsive */
+  @media (max-width: 600px) {
+    nav {
+      gap: 8px;
+    }
+    .product-card img {
+      height: 140px;
+    }
+  }
+</style>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body>
 
-  <!-- Ürün Listesi -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-6">
-    <div onclick="showProductDetail(1)" class="bg-white shadow rounded cursor-pointer hover:shadow-lg transition">
-      <img src="https://picsum.photos/id/101/400/300" class="w-full h-64 object-cover rounded-t" />
-      <div class="p-4">
-        <h3 class="font-semibold text-lg">Oversize T-Shirt</h3>
-        <p class="text-green-600 font-bold mt-1">199 TL</p>
-      </div>
-    </div>
+<header>
+  <div class="logo">MottoTrend</div>
+  <nav>
+    <button id="cartBtn" aria-label="Sepet">
+      🛒 Sepet <span id="cartCount">(0)</span>
+    </button>
+    <button id="orderTrackBtn" aria-label="Sipariş Takip">
+      📦 Sipariş Takip
+    </button>
+  </nav>
+</header>
 
-    <!-- İstediğin kadar ürün buraya ekleyebilirsin -->
+<main>
+  <section class="products" id="productsContainer">
+    <!-- Ürün kartları buraya gelecek -->
+  </section>
+</main>
+
+<!-- Sepet Modal -->
+<div class="modal-bg" id="cartModal" role="dialog" aria-modal="true" aria-labelledby="cartTitle">
+  <div class="modal">
+    <button class="close-btn" id="closeCart">&times;</button>
+    <h2 id="cartTitle">Sepetiniz</h2>
+    <div class="cart-items" id="cartItems"></div>
+    <form id="orderForm">
+      <h3>Sipariş Bilgileri</h3>
+      <label for="address">Adresiniz</label>
+      <input type="text" id="address" name="address" required placeholder="Adresinizi giriniz" />
+      <label for="bankInfo">Banka/Kart Bilgisi</label>
+      <input type="text" id="bankInfo" name="bankInfo" required placeholder="Kart bilgisi" />
+      <button type="submit" class="submit-btn">Siparişi Onayla</button>
+    </form>
   </div>
+</div>
 
-  <!-- Ürün Detay Paneli -->
-  <div id="productModal" class="fixed inset-0 bg-black bg-opacity-60 hidden justify-center items-center z-50">
-    <div class="bg-white w-[90%] max-w-2xl rounded shadow-lg overflow-hidden relative">
-      <button onclick="closeModal()" class="absolute top-3 right-3 text-2xl">&times;</button>
-      <div class="md:flex">
-        <img id="modalImg" src="" class="w-full md:w-1/2 object-cover" />
-        <div class="p-6 md:w-1/2">
-          <h2 id="modalTitle" class="text-2xl font-bold mb-2">Ürün Adı</h2>
-          <p id="modalDesc" class="text-gray-600 mb-4">Ürün açıklaması burada yer alır.</p>
-          <p id="modalPrice" class="text-green-700 text-xl font-semibold mb-4">Fiyat</p>
-          <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500">Satın Al</button>
+<!-- Sipariş Takip Modal -->
+<div class="modal-bg" id="orderTrackModal" role="dialog" aria-modal="true" aria-labelledby="orderTrackTitle">
+  <div class="modal">
+    <button class="close-btn" id="closeOrderTrack">&times;</button>
+    <h2 id="orderTrackTitle">Sipariş Takip</h2>
+    <div id="orderTrackContent">
+      <!-- Sipariş durumu gösterilecek -->
+    </div>
+  </div>
+</div>
+
+<!-- Admin Giriş ve Panel Footer’da -->
+
+<footer>
+  <div class="footer-content">
+    <div class="contact-info">
+      <h3>İletişim</h3>
+      <p>E-posta: destek@mottotrend.com</p>
+      <p>Telefon: +90 555 123 4567</p>
+      <p>Adres: İstanbul, Türkiye</p>
+    </div>
+    <div class="admin-login">
+      <button id="adminLoginBtn">Admin Girişi</button>
+    </div>
+  </div>
+</footer>
+
+<!-- Admin Login Modal -->
+<div class="modal-bg" id="adminLoginModal" role="dialog" aria-modal="true" aria-labelledby="adminLoginTitle">
+  <div class="modal">
+    <button class="close-btn" id="closeAdminLogin">&times;</button>
+    <h2 id="adminLoginTitle">Admin Girişi</h2>
+    <form id="adminLoginForm">
+      <label for="adminUser">Kullanıcı Adı</label>
+      <input type="text" id="adminUser" name="adminUser" required placeholder="Kullanıcı adı" />
+      <label for="adminPass">Şifre</label>
+      <input type="password" id="adminPass" name="adminPass" required placeholder="Şifre" />
+      <button type="submit" class="submit-btn">Giriş Yap</button>
+    </form>
+  </div>
+</div>
+
+<!-- Admin Panel Modal -->
+<div class="modal-bg" id="adminPanelModal" role="dialog" aria-modal="true" aria-labelledby="adminPanelTitle">
+  <div class="modal" style="max-width: 950px; overflow-y: auto;">
+    <button class="close-btn" id="closeAdminPanel">&times;</button>
+    <h2 id="adminPanelTitle">Admin Panel</h2>
+    <div id="adminPanel">
+      <!-- Kullanıcılar ve sipariş tablosu buraya gelecek -->
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  // Ürün verileri (20 tane, gerçekçi görseller)
+  const products = [
+    {id:1,title:"Kadın Beyaz Tişört",price:79.90,img:"https://cdn.pixabay.com/photo/2016/03/27/21/49/woman-1284413_1280.jpg"},
+    {id:2,title:"Erkek Siyah Mont",price:249.90,img:"https://cdn.pixabay.com/photo/2015/03/26/09/54/man-690032_1280.jpg"},
+    {id:3,title:"Kadın Kot Pantolon",price:129.90,img:"https://cdn.pixabay.com/photo/2017/08/06/22/26/woman-2597921_1280.jpg"},
+    {id:4,title:"Erkek Spor Ayakkabı",price:199.90,img:"https://cdn.pixabay.com/photo/2017/07/31/11/21/man-2557417_1280.jpg"},
+    {id:5,title:"Kadın Güneş Gözlüğü",price:69.90,img:"https://cdn.pixabay.com/photo/2016/11/21/15/48/woman-1846417_1280.jpg"},
+    {id:6,title:"Erkek Deri Cüzdan",price:149.90,img:"https://cdn.pixabay.com/photo/2016/11/29/03/53/wallet-1869956_1280.jpg"},
+    {id:7,title:"Kadın Çanta",price:179.90,img:"https://cdn.pixabay.com/photo/2017/06/07/08/58/woman-2387433_1280.jpg"},
+    {id:8,title:"Erkek Saat",price:299.90,img:"https://cdn.pixabay.com/photo/2015/10/29/20/37/wristwatch-1013282_1280.jpg"},
+    {id:9,title:"Kadın Spor Tayt",price:99.90,img:"https://cdn.pixabay.com/photo/2017/09/07/10/51/girl-2722825_1280.jpg"},
+    {id:10,title:"Erkek Şapka",price:49.90,img:"https://cdn.pixabay.com/photo/2016/11/21/14/18/man-1846129_1280.jpg"},
+    {id:11,title:"Kadın Elbise",price:299.90,img:"https://cdn.pixabay.com/photo/2017/03/30/12/37/woman-2191546_1280.jpg"},
+    {id:12,title:"Erkek T-Shirt",price:89.90,img:"https://cdn.pixabay.com/photo/2016/03/26/22/22/people-1284025_1280.jpg"},
+    {id:13,title:"Kadın Bot",price:249.90,img:"https://cdn.pixabay.com/photo/2017/08/02/01/02/woman-2562093_1280.jpg"},
+    {id:14,title:"Erkek Pantolon",price:149.90,img:"https://cdn.pixabay.com/photo/2017/02/15/10/47/man-2068221_1280.jpg"},
+    {id:15,title:"Kadın Şal",price:59.90,img:"https://cdn.pixabay.com/photo/2017/01/20/00/30/woman-1990346_1280.jpg"},
+    {id:16,title:"Erkek Ceket",price:299.90,img:"https://cdn.pixabay.com/photo/2017/01/30/16/48/man-2023254_1280.jpg"},
+    {id:17,title:"Kadın Spor Ayakkabı",price:199.90,img:"https://cdn.pixabay.com/photo/2015/01/19/13/51/woman-604089_1280.jpg"},
+    {id:18,title:"Erkek Spor Çanta",price:179.90,img:"https://cdn.pixabay.com/photo/2016/12/06/22/06/backpack-1888224_1280.jpg"},
+    {id:19,title:"Kadın Takı Seti",price:129.90,img:"https://cdn.pixabay.com/photo/2017/04/12/16/45/woman-2224173_1280.jpg"},
+    {id:20,title:"Erkek Spor Ayakkabı 2",price:179.90,img:"https://cdn.pixabay.com/photo/2016/11/23/14/45/shoes-1850217_1280.jpg"},
+  ];
+
+  // LocalStorage anahtarları
+  const CART_KEY = "mottotrend_cart";
+  const ORDERS_KEY = "mottotrend_orders";
+  const USERS_KEY = "mottotrend_users";
+  const ADMIN_USER = "admin";
+  const ADMIN_PASS = "admin";
+
+  // Sepet, sipariş, kullanıcı verileri
+  let cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+  let orders = JSON.parse(localStorage.getItem(ORDERS_KEY)) || [];
+  let users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+
+  // Şu anki admin login durumu
+  let adminLoggedIn = false;
+
+  // Elements
+  const productsContainer = document.getElementById("productsContainer");
+  const cartBtn = document.getElementById("cartBtn");
+  const orderTrackBtn = document.getElementById("orderTrackBtn");
+  const cartModal = document.getElementById("cartModal");
+  const orderTrackModal = document.getElementById("orderTrackModal");
+  const adminLoginBtn = document.getElementById("adminLoginBtn");
+  const adminLoginModal = document.getElementById("adminLoginModal");
+  const adminPanelModal = document.getElementById("adminPanelModal");
+
+  // Cart count span
+  const cartCountSpan = document.getElementById("cartCount");
+
+  // Sepet sayısını güncelle
+  function updateCartCount() {
+    let count = cart.reduce((acc, item) => acc + item.qty, 0);
+    cartCountSpan.textContent = `(${count})`;
+  }
+
+  // Ürünleri göster
+  function showProducts() {
+    productsContainer.innerHTML = "";
+    products.forEach(p => {
+      const card = document.createElement("article");
+      card.className = "product-card";
+      card.innerHTML = `
+        <img src="${p.img}" alt="${p.title}" />
+        <div class="product-info">
+          <div class="product-title">${p.title}</div>
+          <div class="product-price">${p.price.toFixed(2)}₺</div>
+          <button class="add-cart-btn" data-id="${p.id}">Sepete Ekle</button>
         </div>
-      </div>
-    </div>
-  </div>
+      `;
+      productsContainer.appendChild(card);
+    });
+  }
 
-  <script>
-    const products = {
-      1: {
-        ad: "Oversize T-Shirt",
-        aciklama: "Pamuklu kumaş, rahat kesim.",
-        fiyat: "199 TL",
-        resim: "https://picsum.photos/id/101/600/400"
+  // Sepeti göster
+  const cartItemsContainer = document.getElementById("cartItems");
+  const orderForm = document.getElementById("orderForm");
+  function renderCart() {
+    if(cart.length === 0) {
+      cartItemsContainer.innerHTML = "<p>Sepetiniz boş.</p>";
+      orderForm.style.display = "none";
+      return;
+    }
+    orderForm.style.display = "block";
+    cartItemsContainer.innerHTML = "";
+    cart.forEach(item => {
+      const p = products.find(pr => pr.id === item.id);
+      const div = document.createElement("div");
+      div.className = "cart-item";
+      div.innerHTML = `
+        <img src="${p.img}" alt="${p.title}" />
+        <div class="cart-item-info">
+          <div class="cart-item-title">${p.title}</div>
+          <div class="cart-item-qty">
+            <button class="qty-btn" data-id="${item.id}" data-action="dec">-</button>
+            <span class="qty-num">${item.qty}</span>
+            <button class="qty-btn" data-id="${item.id}" data-action="inc">+</button>
+          </div>
+        </div>
+        <button class="remove-btn" data-id="${item.id}" title="Ürünü kaldır">&times;</button>
+      `;
+      cartItemsContainer.appendChild(div);
+    });
+  }
+
+  // Sepete ürün ekle
+  function addToCart(id) {
+    const found = cart.find(i => i.id === id);
+    if(found) found.qty++;
+    else cart.push({id:id, qty:1});
+    saveCart();
+    updateCartCount();
+  }
+
+  // Sepetten ürün çıkar / azalt / kaldır
+  function updateCartItem(id, action) {
+    const found = cart.find(i => i.id === id);
+    if(!found) return;
+    if(action === "inc") found.qty++;
+    else if(action === "dec") {
+      found.qty--;
+      if(found.qty <= 0) {
+        cart = cart.filter(i => i.id !== id);
       }
-    };
-
-    function showProductDetail(id) {
-      const p = products[id];
-      document.getElementById('modalImg').src = p.resim;
-      document.getElementById('modalTitle').textContent = p.ad;
-      document.getElementById('modalDesc').textContent = p.aciklama;
-      document.getElementById('modalPrice').textContent = p.fiyat;
-      document.getElementById('productModal').classList.remove('hidden');
-      document.getElementById('productModal').classList.add('flex');
     }
+    saveCart();
+    updateCartCount();
+  }
+  function removeCartItem(id) {
+    cart = cart.filter(i => i.id !== id);
+    saveCart();
+    updateCartCount();
+  }
 
-    function closeModal() {
-      document.getElementById('productModal').classList.add('hidden');
+  // Verileri kaydet
+  function saveCart() {
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
+  }
+  function saveOrders() {
+    localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+  }
+  function saveUsers() {
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  }
+
+  // Sepet modal aç/kapa
+  cartBtn.addEventListener("click", () => {
+    renderCart();
+    cartModal.classList.add("active");
+  });
+  document.getElementById("closeCart").addEventListener("click", () => {
+    cartModal.classList.remove("active");
+  });
+
+  // Sepetteki buton işlemleri (artır/azalt/kaldır)
+  cartItemsContainer.addEventListener("click", (e) => {
+    if(e.target.classList.contains("qty-btn")) {
+      const id = Number(e.target.dataset.id);
+      const action = e.target.dataset.action;
+      updateCartItem(id, action);
+      renderCart();
+    } else if(e.target.classList.contains("remove-btn")) {
+      const id = Number(e.target.dataset.id);
+      removeCartItem(id);
+      renderCart();
     }
-  </script>
+  });
+
+  // Sepet sipariş formu gönderme
+  orderForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if(cart.length === 0) {
+      alert("Sepetiniz boş!");
+      return;
+    }
+    const address = orderForm.address.value.trim();
+    const bankInfo = orderForm.bankInfo.value.trim();
+    if(!address || !bankInfo) {
+      alert("Lütfen tüm bilgileri doldurun.");
+      return;
+    }
+    // Yeni kullanıcı ve sipariş kaydı
+    const now = new Date().toISOString();
+    const userId = Date.now(); // basit id
+
+    // Kullanıcı kaydet
+    users.push({id:userId, address, bankInfo, created: now});
+    saveUsers();
+
+    // Sipariş kaydet (sepetteki ürünler + durum)
+    orders.push({
+      userId,
+      date: now,
+      products: [...cart],
+      status: "Sipariş alındı"
+    });
+    saveOrders();
+
+    alert("Siparişiniz alındı! Sipariş takip bölümünden kontrol edebilirsiniz.");
+
+    // Sepeti temizle
+    cart = [];
+    saveCart();
+    updateCartCount();
+    cartModal.classList.remove("active");
+  });
+
+  // Sipariş Takip Modal aç/kapa
+  orderTrackBtn.addEventListener("click", () => {
+    renderOrderTrack();
+    orderTrackModal.classList.add("active");
+  });
+  document.getElementById("closeOrderTrack").addEventListener("click", () => {
+    orderTrackModal.classList.remove("active");
+  });
+
+  // Sipariş Takip gösterimi
+  const orderTrackContent = document.getElementById("orderTrackContent");
+  function renderOrderTrack() {
+    orderTrackContent.innerHTML = "";
+    if(orders.length === 0) {
+      orderTrackContent.innerHTML = "<p>Henüz siparişiniz bulunmamaktadır. <a href='#'>Alışverişe başlayın!</a></p>";
+      return;
+    }
+    // En son siparişi göster
+    const lastOrder = orders[orders.length - 1];
+    // Kullanıcı bilgisi
+    const user = users.find(u => u.id === lastOrder.userId);
+
+    let html = `<p><strong>Sipariş Tarihi:</strong> ${new Date(lastOrder.date).toLocaleString()}</p>`;
+    html += "<ul>";
+    lastOrder.products.forEach(item => {
+      const p = products.find(pr => pr.id === item.id);
+      html += `<li>${p.title} x${item.qty}</li>`;
+    });
+    html += "</ul>";
+    html += `<p><strong>Adres:</strong> ${user ? user.address : "Bilinmiyor"}</p>`;
+    html += `<p><strong>Kargo Durumu:</strong> <em>${lastOrder.status}</em></p>`;
+    orderTrackContent.innerHTML = html;
+  }
+
+  // Admin login modal aç/kapa
+  adminLoginBtn.addEventListener("click", () => {
+    adminLoginModal.classList.add("active");
+  });
+  document.getElementById("closeAdminLogin").addEventListener("click", () => {
+    adminLoginModal.classList.remove("active");
+  });
+
+  // Admin login formu
+  const adminLoginForm = document.getElementById("adminLoginForm");
+  adminLoginForm.addEventListener("submit", e => {
+    e.preventDefault();
+    const user = adminLoginForm.adminUser.value.trim();
+    const pass = adminLoginForm.adminPass.value.trim();
+    if(user === ADMIN_USER && pass === ADMIN_PASS) {
+      adminLoggedIn = true;
+      alert("Admin girişi başarılı.");
+      adminLoginModal.classList.remove("active");
+      showAdminPanel();
+    } else {
+      alert("Hatalı kullanıcı adı veya şifre.");
+    }
+  });
+
+  // Admin panel modal aç/kapa
+  function showAdminPanel() {
+    if(!adminLoggedIn) {
+      alert("Lütfen önce admin girişi yapın.");
+      return;
+    }
+    adminPanelModal.classList.add("active");
+    renderAdminPanel();
+  }
+  document.getElementById("closeAdminPanel").addEventListener("click", () => {
+    adminPanelModal.classList.remove("active");
+  });
+
+  // Admin panel içeriği
+  const adminPanelDiv = document.getElementById("adminPanel");
+
+  function renderAdminPanel() {
+    if(users.length === 0) {
+      adminPanelDiv.innerHTML = "<p>Henüz kullanıcı veya sipariş bulunmamaktadır.</p>";
+      return;
+    }
+    let html = `<h3>Kullanıcılar ve Siparişleri</h3>`;
+    html += `<table><thead>
+      <tr><th>Kullanıcı ID</th><th>Kayıt Tarihi</th><th>Siparişler</th></tr>
+    </thead><tbody>`;
+    users.forEach(user => {
+      const userOrders = orders.filter(o => o.userId === user.id);
+      html += `<tr>
+        <td>${user.id}</td>
+        <td>${new Date(user.created).toLocaleString()}</td>
+        <td>`;
+      if(userOrders.length === 0) html += "Sipariş yok";
+      else {
+        userOrders.forEach(order => {
+          html += `<div><strong>${new Date(order.date).toLocaleString()}</strong><br/>`;
+          order.products.forEach(item => {
+            const p = products.find(pr => pr.id === item.id);
+            html += `${p.title} x${item.qty}<br/>`;
+          });
+          html += `Durum: <select class="status-select" data-orderid="${order.date}">
+            <option value="Sipariş alındı" ${order.status === "Sipariş alındı" ? "selected" : ""}>Sipariş alındı</option>
+            <option value="Hazırlanıyor" ${order.status === "Hazırlanıyor" ? "selected" : ""}>Hazırlanıyor</option>
+            <option value="Yola çıktı" ${order.status === "Yola çıktı" ? "selected" : ""}>Yola çıktı</option>
+            <option value="Teslim edildi" ${order.status === "Teslim edildi" ? "selected" : ""}>Teslim edildi</option>
+          </select>
+          </div><hr/>`;
+        });
+      }
+      html += `</td></tr>`;
+    });
+    html += `</tbody></table>`;
+    adminPanelDiv.innerHTML = html;
+
+    // Status değişim dinleyicisi
+    document.querySelectorAll(".status-select").forEach(sel => {
+      sel.addEventListener("change", e => {
+        const orderDate = e.target.dataset.orderid;
+        const newStatus = e.target.value;
+        const order = orders.find(o => o.date === orderDate);
+        if(order) {
+          order.status = newStatus;
+          saveOrders();
+          alert("Sipariş durumu güncellendi.");
+        }
+      });
+    });
+  }
+
+  // Ürün ekle butonları dinle
+  productsContainer.addEventListener("click", e => {
+    if(e.target.classList.contains("add-cart-btn")) {
+      const id = Number(e.target.dataset.id);
+      addToCart(id);
+      alert("Ürün sepete eklendi.");
+    }
+  });
+
+  // Başlangıç
+  showProducts();
+  updateCartCount();
+
+})();
+</script>
 
 </body>
 </html>
