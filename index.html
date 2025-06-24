@@ -1,221 +1,551 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>HızlıAlış</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-  <style> body { font-family: 'Poppins', sans-serif; } </style>
+  <link
+    href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+    rel="stylesheet"
+  />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+  <script
+    src="https://kit.fontawesome.com/a076d05399.js"
+    crossorigin="anonymous"
+  ></script>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+    }
+    #hesapPanel {
+      transition: transform 0.3s ease;
+      transform: translateX(100%);
+    }
+    #hesapPanel.active {
+      transform: translateX(0);
+    }
+  </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
-
   <!-- HEADER -->
-  <header class="bg-blue-900 text-white p-4 flex justify-between items-center">
+  <header
+    class="bg-blue-900 text-white p-4 flex justify-between items-center"
+  >
     <h1 class="text-2xl font-bold">HızlıAlış</h1>
-    <nav id="topNav">
-      <button onclick="girisPanelGoster()" id="btnGiris" class="mx-2 px-4 py-2 bg-blue-700 rounded hover:bg-blue-600">Giriş Yap</button>
-      <button onclick="kayitPanelGoster()" id="btnKayit" class="mx-2 px-4 py-2 bg-green-700 rounded hover:bg-green-600">Kayıt Ol</button>
-      <button onclick="cikisYap()" id="btnCikis" class="mx-2 px-4 py-2 bg-red-600 rounded hover:bg-red-500 hidden">Çıkış Yap</button>
+    <nav id="topNav" class="flex items-center gap-3">
+      <button
+        onclick="girisPanelGoster()"
+        id="btnGiris"
+        class="px-4 py-2 bg-blue-700 rounded hover:bg-blue-600"
+      >
+        Giriş Yap
+      </button>
+      <button
+        onclick="kayitPanelGoster()"
+        id="btnKayit"
+        class="px-4 py-2 bg-green-700 rounded hover:bg-green-600"
+      >
+        Kayıt Ol
+      </button>
+      <button
+        onclick="toggleHesapPanel()"
+        id="btnHesap"
+        class="hidden"
+        title="Hesabım"
+      >
+        <img
+          src="https://cdn-icons-png.flaticon.com/512/847/847969.png"
+          alt="Hesap"
+          class="w-8 h-8 rounded-full"
+        />
+      </button>
     </nav>
   </header>
 
-  <!-- MAIN -->
-  <main class="container mx-auto py-8 flex-1">
-    
-    <!-- GİRİŞ -->
-    <section id="giris" class="max-w-md mx-auto bg-white rounded shadow p-6">
+  <!-- HESAP PANELİ SLIDE -->
+  <aside
+    id="hesapPanel"
+    class="fixed top-0 right-0 w-64 h-full bg-white shadow-lg z-50 p-4 flex flex-col"
+  >
+    <h2 class="text-xl font-semibold mb-4">Hesabım</h2>
+    <div class="flex-1" id="hesapBilgi">
+      <p class="mb-2 font-medium">Hoş geldiniz!</p>
+      <p><strong>Kullanıcı:</strong> <span id="hesapKullanici"></span></p>
+      <p><strong>Bakiye:</strong> <span id="hesapBakiye"></span> TL</p>
+      <p><strong>Adres:</strong> <span id="hesapAdres"></span></p>
+    </div>
+    <button
+      onclick="cikisYap()"
+      class="mt-auto bg-red-600 text-white px-4 py-2 rounded hover:bg-red-500"
+    >
+      Çıkış Yap
+    </button>
+  </aside>
+
+  <main class="container mx-auto py-8 flex-grow">
+    <!-- GİRİŞ PANELİ -->
+    <section
+      id="giris"
+      class="max-w-md mx-auto bg-white rounded shadow p-6"
+      style="display: block"
+    >
       <h2 class="text-xl font-semibold mb-4">Giriş Yap</h2>
-      <input type="text" id="girisKullanici" placeholder="Kullanıcı Adı" class="w-full mb-3 p-2 border rounded">
-      <input type="password" id="girisSifre" placeholder="Şifre" class="w-full mb-3 p-2 border rounded">
-      <button onclick="girisYap()" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-500">Giriş Yap</button>
+      <input
+        type="text"
+        id="girisKullanici"
+        placeholder="Kullanıcı Adı"
+        class="w-full mb-3 p-2 border rounded"
+      />
+      <input
+        type="password"
+        id="girisSifre"
+        placeholder="Şifre"
+        class="w-full mb-3 p-2 border rounded"
+      />
+      <button
+        onclick="girisYap()"
+        class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-500"
+      >
+        Giriş Yap
+      </button>
     </section>
 
-    <!-- KAYIT -->
-    <section id="kayit" class="max-w-md mx-auto bg-white rounded shadow p-6 hidden">
+    <!-- KAYIT PANELİ -->
+    <section
+      id="kayit"
+      class="max-w-md mx-auto bg-white rounded shadow p-6 hidden"
+    >
       <h2 class="text-xl font-semibold mb-4">Kayıt Ol</h2>
-      <input type="text" id="kayitKullanici" placeholder="Kullanıcı Adı" class="w-full mb-3 p-2 border rounded">
-      <input type="password" id="kayitSifre" placeholder="Şifre" class="w-full mb-3 p-2 border rounded">
-      <select id="kayitIl" onchange="ilceGetir()" class="w-full mb-3 p-2 border rounded">
+      <input
+        type="text"
+        id="kayitKullanici"
+        placeholder="Kullanıcı Adı"
+        class="w-full mb-3 p-2 border rounded"
+      />
+      <input
+        type="password"
+        id="kayitSifre"
+        placeholder="Şifre"
+        class="w-full mb-3 p-2 border rounded"
+      />
+      <select
+        id="kayitIl"
+        onchange="ilceGetir()"
+        class="w-full mb-3 p-2 border rounded"
+      >
         <option value="">İl Seçin</option>
       </select>
-      <select id="kayitIlce" class="w-full mb-3 p-2 border rounded">
+      <select
+        id="kayitIlce"
+        class="w-full mb-3 p-2 border rounded"
+      >
         <option value="">İlçe Seçin</option>
       </select>
-      <input type="text" id="kayitAdres" placeholder="Açık Adres" class="w-full mb-3 p-2 border rounded">
-      <input type="text" id="kayitPostaKodu" placeholder="Posta Kodu" class="w-full mb-3 p-2 border rounded">
-      <input type="text" id="kayitTelefon" placeholder="Telefon Numarası" class="w-full mb-3 p-2 border rounded">
-      <button onclick="kayitOl()" class="w-full bg-green-600 text-white p-2 rounded hover:bg-green-500">Kayıt Ol</button>
+      <input
+        type="text"
+        id="kayitAdres"
+        placeholder="Açık Adres"
+        class="w-full mb-3 p-2 border rounded"
+      />
+      <input
+        type="text"
+        id="kayitPostaKodu"
+        placeholder="Posta Kodu"
+        class="w-full mb-3 p-2 border rounded"
+      />
+      <input
+        type="text"
+        id="kayitTelefon"
+        placeholder="Telefon Numarası"
+        class="w-full mb-3 p-2 border rounded"
+      />
+      <button
+        onclick="kayitOl()"
+        class="w-full bg-green-600 text-white p-2 rounded hover:bg-green-500"
+      >
+        Kayıt Ol
+      </button>
     </section>
 
-    <!-- ÜRÜN LİSTELEME -->
-    <section id="urunler" class="mt-8 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      <!-- JavaScript ile doldurulacak -->
-    </section>
-
-    <!-- SIPARİŞ PANELİ -->
-    <section id="siparisPanel" class="mt-8 max-w-md mx-auto bg-white rounded shadow p-6 hidden">
-      <h2 class="text-xl font-semibold mb-4">Sipariş Detayı</h2>
-      <p id="seciliUrunAdi" class="font-medium"></p>
-      <img id="seciliUrunImg" class="w-full h-40 object-contain mb-4" src="" alt="Ürün">
-      <input type="number" id="sipAdet" min="1" value="1" class="w-full mb-3 p-2 border rounded">
-      <button onclick="siparisOlustur()" class="w-full bg-yellow-500 text-white p-2 rounded hover:bg-yellow-400">Sipariş Oluştur</button>
+    <!-- ÜRÜNLER BÖLÜMÜ -->
+    <section
+      id="urunler"
+      class="hidden mt-8 max-w-5xl mx-auto bg-white rounded shadow p-6"
+    >
+      <h2 class="text-2xl font-semibold mb-6">Ürünlerimiz</h2>
+      <div
+        id="urunListesi"
+        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"
+      >
+        <!-- Ürün kartları JS ile gelecek -->
+      </div>
     </section>
 
     <!-- SİPARİŞLER -->
-    <section id="siparislerim" class="mt-8 max-w-2xl mx-auto hidden">
+    <section
+      id="kullaniciSiparisleri"
+      class="hidden mt-8 max-w-5xl mx-auto bg-white rounded shadow p-6"
+    >
       <h2 class="text-xl font-semibold mb-4">Siparişlerim</h2>
-      <div id="aktifListesi" class="space-y-2 mb-6"></div>
-      <div id="gecmisListesi" class="space-y-2"></div>
+      <div id="aktifSiparisler" class="mb-6">
+        <h3 class="text-lg font-semibold mb-2">Aktif Siparişler</h3>
+        <div id="aktifListesi" class="space-y-2"></div>
+      </div>
+      <div id="gecmisSiparisler">
+        <h3 class="text-lg font-semibold mb-2">Geçmiş Siparişler</h3>
+        <div id="gecmisListesi" class="space-y-2"></div>
+      </div>
     </section>
-
   </main>
 
-  <!-- FOOTER -->
-  <footer class="bg-blue-900 text-white text-center p-4">
+  <footer
+    class="bg-blue-900 text-white text-center p-4 mt-10"
+  >
     <p>&copy; 2025 HızlıAlış</p>
   </footer>
 
+  <script>
+    // İller ve ilçeler örnek
+    const iller = {
+      İstanbul: ["Kadıköy", "Üsküdar", "Beşiktaş"],
+      Ankara: ["Çankaya", "Keçiören", "Mamak"],
+      İzmir: ["Konak", "Karşıyaka", "Bornova"],
+    };
 
-<script>
-  const iller = {
-    'İstanbul':['Kadıköy','Üsküdar','Beşiktaş'],
-    'Ankara':['Çankaya','Keçiören','Mamak'],
-    'İzmir':['Konak','Karşıyaka','Bornova']
-  };
-  window.onload = () => {
-    for (let il in iller) {
-      let o = document.createElement('option');
-      o.value = il; o.textContent = il;
-      document.getElementById('kayitIl').appendChild(o);
+    // Ürün verileri (gerçek görsellerle değiştirilmiştir)
+    const urunler = [
+      {
+        id: 1,
+        isim: "Telefon",
+        fiyat: 15000,
+        gorsel:
+          "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=400&q=80",
+      },
+      {
+        id: 2,
+        isim: "Kulaklık",
+        fiyat: 500,
+        gorsel:
+          "https://images.unsplash.com/photo-1511367461989-f85a21fda167?auto=format&fit=crop&w=400&q=80",
+      },
+      {
+        id: 3,
+        isim: "Klavye",
+        fiyat: 1000,
+        gorsel:
+          "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=80",
+      },
+      {
+        id: 4,
+        isim: "Sweatshirt",
+        fiyat: 350,
+        gorsel:
+          "https://images.unsplash.com/photo-1521334884684-d80222895322?auto=format&fit=crop&w=400&q=80",
+      },
+      {
+        id: 5,
+        isim: "Spor Ayakkabı",
+        fiyat: 1200,
+        gorsel:
+          "https://images.unsplash.com/photo-1508609349937-5ec4ae374ebf?auto=format&fit=crop&w=400&q=80",
+      },
+      {
+        id: 6,
+        isim: "Sırt Çantası",
+        fiyat: 800,
+        gorsel:
+          "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=400&q=80",
+      },
+      {
+        id: 7,
+        isim: "Güneş Gözlüğü",
+        fiyat: 300,
+        gorsel:
+          "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
+      },
+      {
+        id: 8,
+        isim: "Saat",
+        fiyat: 600,
+        gorsel:
+          "https://images.unsplash.com/photo-1519741491830-986ac7a8f1e3?auto=format&fit=crop&w=400&q=80",
+      },
+      {
+        id: 9,
+        isim: "Cüzdan",
+        fiyat: 200,
+        gorsel:
+          "https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=400&q=80",
+      },
+      {
+        id: 10,
+        isim: "Mont",
+        fiyat: 900,
+        gorsel:
+          "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=400&q=80",
+      },
+    ];
+
+    // LocalStorage'dan veriler
+    let aktifKullanici = null;
+    let users = JSON.parse(localStorage.getItem("users")) || {
+      admin: "admin1212",
+    };
+    let bakiyeler = JSON.parse(localStorage.getItem("bakiyeler")) || {
+      admin: 0,
+    };
+    let adresler = JSON.parse(localStorage.getItem("adresler")) || { admin: "" };
+    let siparisler = JSON.parse(localStorage.getItem("siparisler")) || {
+      admin: [],
+    };
+    let siparisDurumlari = JSON.parse(localStorage.getItem("siparisDurumlari")) || {
+      admin: [],
+    };
+
+    // İl dropdown doldurma
+    window.onload = () => {
+      for (const il in iller) {
+        const option = document.createElement("option");
+        option.value = il;
+        option.textContent = il;
+        document.getElementById("kayitIl").appendChild(option);
+      }
+      urunleriGoster();
+    };
+
+    function ilceGetir() {
+      const il = document.getElementById("kayitIl").value;
+      const ilceSelect = document.getElementById("kayitIlce");
+      ilceSelect.innerHTML = '<option value="">İlçe Seçin</option>';
+      if (iller[il]) {
+        iller[il].forEach((ilce) => {
+          const option = document.createElement("option");
+          option.value = ilce;
+          option.textContent = ilce;
+          ilceSelect.appendChild(option);
+        });
+      }
     }
-    loadUrunler();
-  };
 
-  // Menü kontrol
-  function girisPanelGoster(){
-    document.getElementById('giris').classList.remove('hidden');
-    document.getElementById('kayit').classList.add('hidden');
-  }
-  function kayitPanelGoster(){
-    document.getElementById('kayit').classList.remove('hidden');
-    document.getElementById('giris').classList.add('hidden');
-  }
-  function cikisYap(){
-    location.reload();
-  }
+    // Panel gösterme fonksiyonları
+    function girisPanelGoster() {
+      document.getElementById("giris").style.display = "block";
+      document.getElementById("kayit").style.display = "none";
+    }
 
-  function ilceGetir(){
-    let il = document.getElementById('kayitIl').value;
-    let ilce = document.getElementById('kayitIlce');
-    ilce.innerHTML = '<option value="">İlçe Seçin</option>';
-    iller[il]?.forEach(i=>{
-      let o = document.createElement('option');
-      o.value=i; o.textContent=i;
-      ilce.appendChild(o);
-    });
-  }
+    function kayitPanelGoster() {
+      document.getElementById("kayit").style.display = "block";
+      document.getElementById("giris").style.display = "none";
+    }
 
-  let aktifKullanici = null;
-  const users = JSON.parse(localStorage.getItem('users'))||{'admin':'admin1212'};
-  const bakiyeler = JSON.parse(localStorage.getItem('bakiyeler'))||{'admin':0};
-  const adresler = JSON.parse(localStorage.getItem('adresler'))||{'admin':''};
-  const siparisler = JSON.parse(localStorage.getItem('siparisler'))||{'admin':[]};
-  const siparisDurumlari = JSON.parse(localStorage.getItem('siparisDurumlari'))||{'admin':[]};
+    // Kayıt olma
+    function kayitOl() {
+      const k = document.getElementById("kayitKullanici").value.trim();
+      const s = document.getElementById("kayitSifre").value;
+      const il = document.getElementById("kayitIl").value;
+      const ilce = document.getElementById("kayitIlce").value;
+      const acikAdres = document.getElementById("kayitAdres").value.trim();
+      const postaKodu = document.getElementById("kayitPostaKodu").value.trim();
+      const telefon = document.getElementById("kayitTelefon").value.trim();
+      const tamAdres = `${il}/${ilce} - ${acikAdres} (${postaKodu}) Tel: ${telefon}`;
 
-  // Ürün listesi
-  const urunList = [
-    {id:1, name:'Akıllı Telefon', price:12000, img:'https://source.unsplash.com/400x300/?smartphone'},
-    {id:2, name:'Kablosuz Kulaklık', price:750, img:'https://source.unsplash.com/400x300/?headphones'},
-    {id:3, name:'Mekanik Klavye', price:1300, img:'https://source.unsplash.com/400x300/?keyboard'},
-    {id:4, name:'Gaming Mouse', price:700, img:'https://source.unsplash.com/400x300/?mouse'},
-    {id:5, name:'24\" Monitör', price:4500, img:'https://source.unsplash.com/400x300/?monitor'},
-    {id:6, name:'USB Bellek 64GB', price:200, img:'https://source.unsplash.com/400x300/?usb'},
-    {id:7, name:'Powerbank 10000mAh', price:850, img:'https://source.unsplash.com/400x300/?powerbank'},
-    {id:8, name:'Web Kamera HD', price:1250, img:'https://source.unsplash.com/400x300/?webcam'},
-    {id:9, name:'Bluetooth Hoparlör', price:950, img:'https://source.unsplash.com/400x300/?speaker'},
-    {id:10, name:'Tablet', price:9500, img:'https://source.unsplash.com/400x300/?tablet'}
-  ];
+      if (!k || !s || !il || !ilce || !acikAdres || !postaKodu || !telefon) {
+        alert("Lütfen tüm alanları doldurun.");
+        return;
+      }
+      if (users[k]) {
+        alert("Kullanıcı zaten var.");
+        return;
+      }
+      users[k] = s;
+      bakiyeler[k] = 100;
+      adresler[k] = tamAdres;
+      siparisler[k] = [];
+      siparisDurumlari[k] = [];
+      kaydetVerileri();
+      alert("Kayıt başarılı.");
+      kayitPanelGoster();
+    }
 
-  function loadUrunler(){
-    let cont = document.getElementById('urunler');
-    urunList.forEach(u=>{
-      let card = document.createElement('div');
-      card.className = 'bg-white rounded shadow hover:shadow-lg transition p-4 flex flex-col';
-      card.innerHTML = `
-        <img src="${u.img}" alt="${u.name}" class="w-full h-48 object-cover mb-3 rounded">
-        <h3 class="font-semibold mb-2">${u.name}</h3>
-        <p class="text-blue-600 font-bold mb-4">${u.price.toLocaleString()} TL</p>
-        <button onclick="urunSecildi(${u.id})" class="mt-auto bg-yellow-500 text-white py-2 rounded hover:bg-yellow-400">Detaya Git</button>
-      `;
-      cont.appendChild(card);
-    });
-  }
+    // Giriş yapma
+    function girisYap() {
+      const k = document.getElementById("girisKullanici").value.trim();
+      const s = document.getElementById("girisSifre").value;
+      if (users[k] === s) {
+        aktifKullanici = k;
+        document.getElementById("btnGiris").classList.add("hidden");
+        document.getElementById("btnKayit").classList.add("hidden");
+        document.getElementById("btnHesap").classList.remove("hidden");
+        document.getElementById("giris").style.display = "none";
+        document.getElementById("kayit").style.display = "none";
+        document.getElementById("urunler").classList.remove("hidden");
+        document.getElementById("kullaniciSiparisleri").classList.remove("hidden");
+        gosterSiparisler();
+        hesapBilgileriniGoster();
+      } else {
+        alert("Bilgiler yanlış.");
+      }
+    }
 
-  function urunSecildi(id){
-    let u = urunList.find(x=>x.id===id);
-    document.getElementById('seciliUrunAdi').textContent = u.name + ' - ' + u.price.toLocaleString() + ' TL';
-    document.getElementById('seciliUrunImg').src = u.img;
-    document.getElementById('sipAdet').value = 1;
-    document.getElementById('siparisPanel').classList.remove('hidden');
-    document.getElementById('siparislerim').classList.add('hidden');
-  }
+    // Hesap panelini aç/kapa
+    function toggleHesapPanel() {
+      const panel = document.getElementById("hesapPanel");
+      panel.classList.toggle("active");
+      hesapBilgileriniGoster();
+    }
 
-  function kayitOl(){
-    let k = document.getElementById('kayitKullanici').value.trim();
-    if(users[k]) return alert('Kullanıcı adı var.');
-    users[k] = document.getElementById('kayitSifre').value;
-    bakiyeler[k]=0; adresler[k]=`${document.getElementById('kayitIl').value}/${document.getElementById('kayitIlce').value} ${document.getElementById('kayitAdres').value}`;
-    siparisler[k]=[]; siparisDurumlari[k]=[];
-    localStorage.setItem('users',JSON.stringify(users));
-    localStorage.setItem('bakiyeler',JSON.stringify(bakiyeler));
-    localStorage.setItem('adresler',JSON.stringify(adresler));
-    localStorage.setItem('siparisler',JSON.stringify(siparisler));
-    localStorage.setItem('siparisDurumlari',JSON.stringify(siparisDurumlari));
-    alert('Kayıt başarılı!');
-    girisPanelGoster();
-  }
+    // Hesap bilgileri göster
+    function hesapBilgileriniGoster() {
+      if (!aktifKullanici) return;
+      document.getElementById("hesapKullanici").textContent = aktifKullanici;
+      document.getElementById("hesapBakiye").textContent = bakiyeler[aktifKullanici] || 0;
+      document.getElementById("hesapAdres").textContent = adresler[aktifKullanici] || "";
+    }
 
-  function girisYap(){
-    let k = document.getElementById('girisKullanici').value.trim(), s = document.getElementById('girisSifre').value;
-    if(users[k]===s){
-      aktifKullanici=k;
-      document.getElementById('btnGiris').classList.add('hidden');
-      document.getElementById('btnKayit').classList.add('hidden');
-      document.getElementById('btnCikis').classList.remove('hidden');
-      document.getElementById('urunler').classList.remove('hidden');
-    }else alert('Hatalı bilgi');
-  }
+    // Çıkış yap
+    function cikisYap() {
+      aktifKullanici = null;
+      document.getElementById("btnGiris").classList.remove("hidden");
+      document.getElementById("btnKayit").classList.remove("hidden");
+      document.getElementById("btnHesap").classList.add("hidden");
+      document.getElementById("urunler").classList.add("hidden");
+      document.getElementById("kullaniciSiparisleri").classList.add("hidden");
+      document.getElementById("hesapPanel").classList.remove("active");
+      document.getElementById("giris").style.display = "block";
+      document.getElementById("kayit").style.display = "none";
+      temizleFormlar();
+    }
 
-  function siparisOlustur(){
-    let adet = parseInt(document.getElementById('sipAdet').value) || 1;
-    let [isim, fiyatTxt] = document.getElementById('seciliUrunAdi').textContent.split(' - ');
-    let fiyat = parseInt(fiyatTxt.replace(/\D/g,''));
-    let toplam = fiyat * adet;
-    if(bakiyeler[aktifKullanici] < toplam) return alert('Yetersiz bakiye!');
-    bakiyeler[aktifKullanici] -= toplam;
-    siparisler[aktifKullanici].push(`${isim} x${adet} (${toplam} TL)`);
-    siparisDurumlari[aktifKullanici].push('Sipariş Alındı');
-    localStorage.setItem('bakiyeler',JSON.stringify(bakiyeler));
-    localStorage.setItem('siparisler',JSON.stringify(siparisler));
-    localStorage.setItem('siparisDurumlari',JSON.stringify(siparisDurumlari));
-    alert('Sipariş aldım ☑️');
-    document.getElementById('siparisPanel').classList.add('hidden');
-    gosterSiparisler();
-  }
+    // Formları temizle
+    function temizleFormlar() {
+      document.getElementById("girisKullanici").value = "";
+      document.getElementById("girisSifre").value = "";
+      document.getElementById("kayitKullanici").value = "";
+      document.getElementById("kayitSifre").value = "";
+      document.getElementById("kayitIl").value = "";
+      document.getElementById("kayitIlce").innerHTML =
+        '<option value="">İlçe Seçin</option>';
+      document.getElementById("kayitAdres").value = "";
+      document.getElementById("kayitPostaKodu").value = "";
+      document.getElementById("kayitTelefon").value = "";
+    }
 
-  function gosterSiparisler(){
-    document.getElementById('siparislerim').classList.remove('hidden');
-    let aktif = document.getElementById('aktifListesi'), gcm = document.getElementById('gecmisListesi');
-    aktif.innerHTML=''; gcm.innerHTML='';
-    siparisler[aktifKullanici].forEach((s,i)=>{
-      let el=document.createElement('div');
-      el.className='p-3 rounded shadow '+(siparisDurumlari[aktifKullanici][i]==='Teslim Edildi'?'bg-green-100':'bg-yellow-100');
-      el.textContent=s+' | Durum: '+siparisDurumlari[aktifKullanici][i];
-      (siparisDurumlari[aktifKullanici][i]==='Teslim Edildi'?gcm:aktif).appendChild(el);
-    });
-  }
-</script>
+    // Ürünleri göster
+    function urunleriGoster() {
+      const urunDiv = document.getElementById("urunListesi");
+      urunDiv.innerHTML = "";
+      urunler.forEach((urun) => {
+        const card = document.createElement("div");
+        card.className =
+          "bg-white rounded shadow hover:shadow-lg transition p-4 flex flex-col items-center";
+
+        const img = document.createElement("img");
+        img.src = urun.gorsel;
+        img.alt = urun.isim;
+        img.className = "w-full h-40 object-cover rounded mb-3";
+
+        const isim = document.createElement("h3");
+        isim.textContent = urun.isim;
+        isim.className = "font-semibold text-lg mb-1";
+
+        const fiyat = document.createElement("p");
+        fiyat.textContent = `${urun.fiyat} TL`;
+        fiyat.className = "text-blue-700 font-bold mb-3";
+
+        const adetInput = document.createElement("input");
+        adetInput.type = "number";
+        adetInput.min = 1;
+        adetInput.value = 1;
+        adetInput.className =
+          "w-full border rounded p-1 text-center mb-3";
+        adetInput.id = `adet_${urun.id}`;
+
+        const siparisBtn = document.createElement("button");
+        siparisBtn.textContent = "Sepete Ekle";
+        siparisBtn.className =
+          "w-full bg-yellow-500 text-white rounded py-2 hover:bg-yellow-400";
+        siparisBtn.onclick = () => siparisOlustur(urun.id);
+
+        card.appendChild(img);
+        card.appendChild(isim);
+        card.appendChild(fiyat);
+        card.appendChild(adetInput);
+        card.appendChild(siparisBtn);
+
+        urunDiv.appendChild(card);
+      });
+    }
+
+    // Sipariş oluştur
+    function siparisOlustur(urunId) {
+      if (!aktifKullanici) {
+        alert("Lütfen giriş yapınız.");
+        return;
+      }
+      const urun = urunler.find((u) => u.id === urunId);
+      const adet = parseInt(
+        document.getElementById(`adet_${urun.id}`).value || "1"
+      );
+      if (adet < 1) {
+        alert("Adet 1'den az olamaz.");
+        return;
+      }
+      const toplamFiyat = urun.fiyat * adet;
+      if ((bakiyeler[aktifKullanici] || 0) < toplamFiyat) {
+        alert("Yetersiz bakiye!");
+        return;
+      }
+      bakiyeler[aktifKullanici] -= toplamFiyat;
+      siparisler[aktifKullanici].push(
+        `${urun.isim} x${adet} (${toplamFiyat} TL)`
+      );
+      siparisDurumlari[aktifKullanici].push("Sipariş Alındı");
+      kaydetVerileri();
+      alert(
+        `Sipariş oluşturuldu. Kalan bakiye: ${bakiyeler[aktifKullanici]} TL`
+      );
+      gosterSiparisler();
+      hesapBilgileriniGoster();
+    }
+
+    // Siparişleri göster
+    function gosterSiparisler() {
+      if (!aktifKullanici) return;
+      const aktifDiv = document.getElementById("aktifListesi");
+      const gecmisDiv = document.getElementById("gecmisListesi");
+      aktifDiv.innerHTML = "";
+      gecmisDiv.innerHTML = "";
+
+      const kullaniciSiparisler = siparisler[aktifKullanici] || [];
+      const kullaniciDurumlar = siparisDurumlari[aktifKullanici] || [];
+
+      kullaniciSiparisler.forEach((siparis, i) => {
+        const durum = kullaniciDurumlar[i];
+        const el = document.createElement("div");
+        el.className = `p-3 rounded shadow mb-2 ${
+          durum === "Teslim Edildi" ? "bg-green-100" : "bg-yellow-100"
+        }`;
+        el.textContent = `${siparis} | Durum: ${durum}`;
+
+        if (durum === "Teslim Edildi") {
+          gecmisDiv.appendChild(el);
+        } else {
+          aktifDiv.appendChild(el);
+        }
+      });
+    }
+
+    // Verileri localStorage'a kaydet
+    function kaydetVerileri() {
+      localStorage.setItem("users", JSON.stringify(users));
+      localStorage.setItem("bakiyeler", JSON.stringify(bakiyeler));
+      localStorage.setItem("adresler", JSON.stringify(adresler));
+      localStorage.setItem("siparisler", JSON.stringify(siparisler));
+      localStorage.setItem("siparisDurumlari", JSON.stringify(siparisDurumlari));
+    }
+  </script>
 </body>
 </html>
