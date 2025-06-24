@@ -1,588 +1,546 @@
 <!DOCTYPE html>
 <html lang="tr">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>HızlıAlış - Bootstrap ile Modern E-Ticaret</title>
-
-  <!-- Bootstrap CSS CDN -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-
+  <title>HızlıAlış</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <style>
-    body {
-      min-height: 100vh;
+    body { font-family: 'Poppins', sans-serif; }
+    #hesapPanel {
+      position: fixed;
+      top: 0; right: 0;
+      width: 280px; height: 100vh;
+      background: white;
+      box-shadow: -4px 0 8px rgba(0,0,0,0.2);
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      z-index: 1100;
       display: flex;
       flex-direction: column;
-      background: #f8f9fa;
+      padding: 1rem;
     }
-
-    header,
-    footer {
-      background-color: #0d6efd;
-      color: white;
+    #hesapPanel.active { transform: translateX(0); }
+    
+    #sepetPanel {
+      position: fixed;
+      top: 0; right: 280px;
+      width: 300px; height: 100vh;
+      background: #f9fafb;
+      box-shadow: -4px 0 8px rgba(0,0,0,0.1);
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      z-index: 1050;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      overflow-y: auto;
     }
+    #sepetPanel.active { transform: translateX(0); }
 
-    header {
-      padding: 1rem 0;
+    #girisPanel, #kayitPanel {
+      max-width: 400px;
+      margin: 3rem auto;
+      padding: 1rem;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-
-    footer {
-      padding: 1rem 0;
-      margin-top: auto;
-      text-align: center;
+    #urunDetayPanel {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      z-index: 1200;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
     }
-
-    .cursor-pointer {
-      cursor: pointer;
+    #urunDetayPanel.active {
+      display: flex;
     }
-
-    .order-item {
-      border-left: 5px solid #0d6efd;
-      background: #e7f1ff;
-      padding: 10px 15px;
-      border-radius: 5px;
-      margin-bottom: 10px;
+    #urunDetayPanel > .content {
+      background: white;
+      max-width: 900px;
+      width: 100%;
+      border-radius: 8px;
+      overflow-y: auto;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      position: relative;
     }
-
-    .order-item.delivered {
-      border-left-color: #198754;
-      background: #d1e7dd;
-    }
-
-    .order-item.cancelled {
-      border-left-color: #dc3545;
-      background: #f8d7da;
-      text-decoration: line-through;
-      color: #842029;
-    }
-
-    #adminOrderList select {
-      min-width: 150px;
-    }
-
-    /* Giriş/Kayıt için toggler */
-    #authToggle {
+    #urunDetayPanel img.main-image {
+      width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+      border-radius: 6px;
       margin-bottom: 1rem;
-      user-select: none;
+    }
+    #urunDetayPanel .thumbnail-list {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      overflow-x: auto;
+    }
+    #urunDetayPanel .thumbnail-list img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.2s ease;
+    }
+    #urunDetayPanel .thumbnail-list img.active {
+      border-color: #2563eb; /* Tailwind blue-600 */
+    }
+    #urunDetayPanel button.close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 2rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #555;
+    }
+
+    main#urunler {
+      max-width: 1200px;
+      margin: 2rem auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill,minmax(280px,1fr));
+      gap: 1.5rem;
+    }
+    main#urunler > div {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      transition: box-shadow 0.3s ease;
+    }
+    main#urunler > div:hover {
+      box-shadow: 0 0 15px rgba(37, 99, 235, 0.6);
+    }
+    main#urunler img {
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+    main#urunler .product-info {
+      padding: 1rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    main#urunler .product-info h3 {
+      font-weight: 700;
+      font-size: 1.125rem;
+      margin-bottom: 0.25rem;
+    }
+    main#urunler .product-info p.description {
+      flex-grow: 1;
+      font-size: 0.875rem;
+      color: #4b5563; /* gray-700 */
+      margin-bottom: 0.75rem;
+    }
+    main#urunler .product-info p.price {
+      font-weight: 600;
+      color: #16a34a; /* green-600 */
+      font-size: 1.125rem;
     }
   </style>
 </head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
 
-<body>
-  <header class="text-center">
-    <h1 class="mb-0">HızlıAlış</h1>
+  <!-- HEADER -->
+  <header class="bg-blue-900 text-white p-4 flex justify-between items-center">
+    <h1 class="text-2xl font-bold">HızlıAlış</h1>
+    <nav id="topNav" class="flex items-center gap-3">
+      <button onclick="girisPanelGoster()" id="btnGiris" class="px-4 py-2 bg-blue-700 rounded hover:bg-blue-600">Giriş Yap</button>
+      <button onclick="kayitPanelGoster()" id="btnKayit" class="px-4 py-2 bg-green-700 rounded hover:bg-green-600">Kayıt Ol</button>
+      <button onclick="toggleHesapPanel()" id="btnHesap" class="hidden relative">
+        <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png" alt="Hesap" class="w-8 h-8 rounded-full" />
+        <span id="sepetAdet" class="absolute -top-1 -right-1 bg-red-600 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">0</span>
+      </button>
+    </nav>
   </header>
 
-  <nav class="navbar navbar-expand-sm navbar-dark bg-primary">
-    <div class="container">
-      <a class="navbar-brand" href="#">HızlıAlış</a>
-      <div>
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a id="navLogin" class="nav-link cursor-pointer">Giriş Yap</a></li>
-          <li class="nav-item"><a id="navRegister" class="nav-link cursor-pointer">Kayıt Ol</a></li>
-          <li class="nav-item"><a id="navLogout" class="nav-link cursor-pointer d-none">Çıkış Yap</a></li>
-          <li class="nav-item"><a id="navAdminPanel" class="nav-link cursor-pointer d-none">Admin Paneli</a></li>
-        </ul>
-      </div>
-      <span id="navWelcome" class="text-white fw-semibold"></span>
+  <!-- GİRİŞ PANELİ -->
+  <section id="girisPanel">
+    <h2 class="text-xl font-bold mb-4">Giriş Yap</h2>
+    <input id="girisKullanici" type="text" placeholder="Kullanıcı Adı" class="border p-2 mb-3 w-full rounded" />
+    <input id="girisSifre" type="password" placeholder="Şifre" class="border p-2 mb-4 w-full rounded" />
+    <button onclick="girisYap()" class="bg-blue-700 text-white px-4 py-2 rounded w-full">Giriş Yap</button>
+  </section>
+
+  <!-- KAYIT PANELİ -->
+  <section id="kayitPanel" style="display:none;">
+    <h2 class="text-xl font-bold mb-4">Kayıt Ol</h2>
+    <input id="kayitKullanici" type="text" placeholder="Kullanıcı Adı" class="border p-2 mb-3 w-full rounded" />
+    <input id="kayitSifre" type="password" placeholder="Şifre" class="border p-2 mb-3 w-full rounded" />
+    <input id="kayitTel" type="tel" placeholder="Telefon" class="border p-2 mb-3 w-full rounded" />
+
+    <input id="kayitIl" list="ilListesi" placeholder="İl" class="border p-2 mb-3 w-full rounded" autocomplete="off" />
+    <datalist id="ilListesi"></datalist>
+
+    <input id="kayitIlce" list="ilceListesi" placeholder="İlçe" class="border p-2 mb-3 w-full rounded" autocomplete="off" />
+    <datalist id="ilceListesi"></datalist>
+
+    <input id="kayitAdres" type="text" placeholder="Açık Adres" class="border p-2 mb-3 w-full rounded" />
+    <input id="kayitPosta" type="text" placeholder="Posta Kodu" class="border p-2 mb-3 w-full rounded" />
+    <button onclick="kayitOl()" class="bg-green-700 text-white px-4 py-2 rounded w-full">Kayıt Ol</button>
+  </section>
+
+  <!-- HESAP PANELİ -->
+  <aside id="hesapPanel">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-semibold">Hesabım</h2>
+      <button onclick="toggleHesapPanel()" class="text-2xl font-bold">&times;</button>
     </div>
-  </nav>
-
-  <main class="container my-4 flex-grow-1">
-    <!-- Giriş/Kayıt Toggle -->
-    <div id="authToggle" class="text-center">
-      <small><span id="toggleLogin" class="text-primary cursor-pointer">Giriş yap</span> | <span id="toggleRegister" class="text-primary cursor-pointer">Kayıt ol</span></small>
+    <div id="hesapBilgi" class="flex-1 overflow-y-auto mb-4">
+      <p class="mb-2 font-medium">Hoş geldiniz!</p>
+      <p>Kullanıcı: <span id="aktifKullaniciAdi"></span></p>
     </div>
+    <button id="adminPanelBtn" onclick="adminPanelGoster()" class="hidden bg-purple-700 text-white px-4 py-2 rounded mb-2">Admin Panel</button>
+    <button onclick="cikisYap()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-500">Çıkış Yap</button>
+  </aside>
 
-    <!-- Giriş Formu -->
-    <section id="loginSection" class="mx-auto" style="max-width: 400px;">
-      <h2 class="mb-4 text-center text-primary">Giriş Yap</h2>
-      <div class="mb-3">
-        <input type="text" id="loginUsername" class="form-control" placeholder="Kullanıcı Adı" autocomplete="username" />
-      </div>
-      <div class="mb-3">
-        <input type="password" id="loginPassword" class="form-control" placeholder="Şifre" autocomplete="current-password" />
-      </div>
-      <button id="loginBtn" class="btn btn-primary w-100">Giriş Yap</button>
-      <div id="loginMessage" class="mt-2 text-center text-danger"></div>
-    </section>
+  <!-- SEPET PANELİ -->
+  <aside id="sepetPanel">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-semibold">Sepetim</h2>
+      <button onclick="toggleSepetPanel()" class="text-2xl font-bold">&times;</button>
+    </div>
+    <div id="sepetIcerik" class="flex-1 overflow-y-auto mb-4">
+      <p class="text-gray-500">Sepetiniz boş.</p>
+    </div>
+    <button onclick="siparisVer()" class="bg-blue-700 text-white px-4 py-2 rounded disabled:opacity-50" id="btnSiparis" disabled>Sipariş Ver</button>
+  </aside>
 
-    <!-- Kayıt Formu -->
-    <section id="registerSection" class="mx-auto d-none" style="max-width: 400px;">
-      <h2 class="mb-4 text-center text-primary">Kayıt Ol</h2>
-      <div class="mb-3">
-        <input type="text" id="registerUsername" class="form-control" placeholder="Kullanıcı Adı" autocomplete="username" />
-      </div>
-      <div class="mb-3">
-        <input type="password" id="registerPassword" class="form-control" placeholder="Şifre" autocomplete="new-password" />
-      </div>
-      <div class="mb-3">
-        <input type="text" id="registerAddress" class="form-control" placeholder="Adres" />
-      </div>
-      <button id="registerBtn" class="btn btn-primary w-100">Kayıt Ol</button>
-      <div id="registerMessage" class="mt-2 text-center text-danger"></div>
-    </section>
-
-    <!-- Kullanıcı Paneli -->
-    <section id="userPanel" class="d-none" style="max-width: 800px; margin: 30px auto;">
-      <h3 class="text-center mb-4">Hoşgeldiniz, <span id="userNameDisplay"></span>!</h3>
-      <div class="mb-3 text-center">
-        <strong>Bakiyeniz: <span id="balanceDisplay">0</span> TL</strong>
-      </div>
-
-      <div class="d-flex gap-2 justify-content-center flex-wrap mb-4" id="orderForm">
-        <select id="productSelect" class="form-select w-auto" aria-label="Ürün seçimi">
-          <option value="Telefon" data-price="15000">Telefon - 15.000 TL</option>
-          <option value="Kulaklık" data-price="500">Kulaklık - 500 TL</option>
-          <option value="Klavye" data-price="1000">Klavye - 1.000 TL</option>
-          <option value="Mouse" data-price="700">Mouse - 700 TL</option>
-          <option value="Monitör" data-price="4500">Monitör - 4.500 TL</option>
-          <option value="USB Bellek" data-price="150">USB Bellek - 150 TL</option>
-          <option value="Powerbank" data-price="800">Powerbank - 800 TL</option>
-          <option value="Web Kamera" data-price="1200">Web Kamera - 1.200 TL</option>
-          <option value="Hoparlör" data-price="950">Hoparlör - 950 TL</option>
-          <option value="Tablet" data-price="9000">Tablet - 9.000 TL</option>
-        </select>
-        <input type="number" id="productQuantity" class="form-control w-auto" min="1" value="1" aria-label="Adet" />
-        <button id="createOrderBtn" class="btn btn-primary">Sipariş Ver</button>
-      </div>
-
-      <div class="row" id="orders">
-        <div class="col-md-6">
-          <h5 class="text-primary text-center">Aktif Siparişler</h5>
-          <div id="activeOrders"></div>
-        </div>
-        <div class="col-md-6">
-          <h5 class="text-primary text-center">Geçmiş Siparişler</h5>
-          <div id="pastOrders"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Admin Paneli -->
-    <section id="adminPanel" class="d-none" style="max-width: 900px; margin: 30px auto;">
-      <h2 class="text-center text-primary mb-4">Admin Paneli</h2>
-      <p class="text-center fw-semibold mb-4">Hoşgeldiniz, Admin!</p>
-
-      <table class="table table-striped table-bordered align-middle text-center">
-        <thead class="table-primary">
-          <tr>
-            <th>Kullanıcı</th>
-            <th>Bakiye (TL)</th>
-            <th>Adres</th>
-            <th>İşlemler</th>
-          </tr>
-        </thead>
-        <tbody id="adminUsersTableBody"></tbody>
-      </table>
-
-      <h5 class="text-primary mt-4 mb-3">Seçili Kullanıcının Siparişleri: <span id="adminSelectedUser"></span></h5>
-      <div id="adminOrderList" class="d-flex flex-column gap-2" style="max-height: 380px; overflow-y: auto;"></div>
-    </section>
+  <!-- ÜRÜNLER -->
+  <main id="urunler" style="display:none;">
+    <!-- JS ile ürünler yüklenecek -->
   </main>
 
-  <footer>
-    <p>&copy; 2025 HızlıAlış</p>
-  </footer>
+  <!-- ÜRÜN DETAY PANELİ -->
+  <div id="urunDetayPanel">
+    <div class="content">
+      <button class="close-btn" onclick="kapatDetay()">&times;</button>
+      <img src="" alt="Ürün Ana Resim" class="main-image" id="detayResim" />
+      <div class="thumbnail-list" id="thumbnailList"></div>
+      <h2 id="detayBaslik" class="text-2xl font-bold mb-2"></h2>
+      <p id="detayAciklama" class="mb-2"></p>
+      <p id="detayFiyat" class="text-xl font-semibold text-green-700 mb-4"></p>
+      <p id="detayTarih" class="text-sm text-gray-600 mb-6"></p>
+      <button onclick="sepeteEkle()" id="btnSepeteEkle" class="bg-green-700 text-white px-6 py-2 rounded hover:bg-green-600">Sepete Ekle</button>
+    </div>
+  </div>
 
-  <!-- Bootstrap Bundle JS CDN (Popper + Bootstrap JS) -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Kullanıcılar
+  let users = { admin: 'admin1212' };
+  let aktifKullanici = null;
 
-  <script>
-    // Veri yapıları (localStorage'dan oku ya da yeni oluştur)
-    let users = JSON.parse(localStorage.getItem('users')) || { admin: 'admin1212' };
-    let balances = JSON.parse(localStorage.getItem('balances')) || { admin: 0 };
-    let addresses = JSON.parse(localStorage.getItem('addresses')) || { admin: '' };
-    let orders = JSON.parse(localStorage.getItem('orders')) || { admin: [] };
-    let orderStatuses = JSON.parse(localStorage.getItem('orderStatuses')) || { admin: [] };
+  // Ürünler (örnek bir ürüne birden fazla resim eklenmiş)
+  let urunler = [];
+  for(let i=1; i<=12; i++) {
+    urunler.push({
+      id: i,
+      ad: `Ürün ${i}`,
+      aciklama: `Bu ürün ${i} açıklamasıdır. Ürün hakkında detaylı bilgiler buraya gelecek.`,
+      fiyat: `${100 + i*10} TL`,
+      tarih: '24.06.2025',
+      resimler: [
+        `https://picsum.photos/seed/${i}a/800/600`,
+        `https://picsum.photos/seed/${i}b/800/600`,
+        `https://picsum.photos/seed/${i}c/800/600`
+      ]
+    });
+  }
 
-    let currentUser = null;
-    let adminSelectedUser = null;
+  // Sepet (ürün id -> adet)
+  let sepet = {};
+  let aktifUrun = null;
 
-    // DOM elementleri
-    const navLogin = document.getElementById('navLogin');
-    const navRegister = document.getElementById('navRegister');
-    const navLogout = document.getElementById('navLogout');
-    const navAdminPanel = document.getElementById('navAdminPanel');
-    const navWelcome = document.getElementById('navWelcome');
+  // DOM elementleri
+  const girisPanel = document.getElementById('girisPanel');
+  const kayitPanel = document.getElementById('kayitPanel');
+  const hesapPanel = document.getElementById('hesapPanel');
+  const sepetPanel = document.getElementById('sepetPanel');
+  const urunlerContainer = document.getElementById('urunler');
+  const urunDetayPanel = document.getElementById('urunDetayPanel');
+  const sepetIcerik = document.getElementById('sepetIcerik');
+  const sepetAdetSpan = document.getElementById('sepetAdet');
+  const btnSiparis = document.getElementById('btnSiparis');
+  const adminPanelBtn = document.getElementById('adminPanelBtn');
+  const aktifKullaniciAdiSpan = document.getElementById('aktifKullaniciAdi');
+  const detayResim = document.getElementById('detayResim');
+  const thumbnailList = document.getElementById('thumbnailList');
 
-    const loginSection = document.getElementById('loginSection');
-    const registerSection = document.getElementById('registerSection');
-    const loginMessage = document.getElementById('loginMessage');
-    const registerMessage = document.getElementById('registerMessage');
+  // İl/ilçe listesi
+  const ilceler = {
+    'İstanbul': ['Kadıköy', 'Beşiktaş', 'Üsküdar'],
+    'Ankara': ['Çankaya', 'Keçiören', 'Sincan'],
+  };
+  const ilInput = document.getElementById('kayitIl');
+  const ilceInput = document.getElementById('kayitIlce');
+  const ilListesi = document.getElementById('ilListesi');
+  const ilceListesi = document.getElementById('ilceListesi');
 
-    const userPanel = document.getElementById('userPanel');
-    const userNameDisplay = document.getElementById('userNameDisplay');
-    const balanceDisplay = document.getElementById('balanceDisplay');
-    const productSelect = document.getElementById('productSelect');
-    const productQuantity = document.getElementById('productQuantity');
-    const activeOrdersDiv = document.getElementById('activeOrders');
-    const pastOrdersDiv = document.getElementById('pastOrders');
-    const createOrderBtn = document.getElementById('createOrderBtn');
+  function ilDoldur() {
+    ilListesi.innerHTML = '';
+    Object.keys(ilceler).forEach(il => {
+      const option = document.createElement('option');
+      option.value = il;
+      ilListesi.appendChild(option);
+    });
+  }
 
-    const adminPanel = document.getElementById('adminPanel');
-    const adminUsersTableBody = document.getElementById('adminUsersTableBody');
-    const adminSelectedUserSpan = document.getElementById('adminSelectedUser');
-    const adminOrderListDiv = document.getElementById('adminOrderList');
-
-    const toggleLogin = document.getElementById('toggleLogin');
-    const toggleRegister = document.getElementById('toggleRegister');
-    const authToggle = document.getElementById('authToggle');
-
-    // Veri kaydet
-    function saveData() {
-      localStorage.setItem('users', JSON.stringify(users));
-      localStorage.setItem('balances', JSON.stringify(balances));
-      localStorage.setItem('addresses', JSON.stringify(addresses));
-      localStorage.setItem('orders', JSON.stringify(orders));
-      localStorage.setItem('orderStatuses', JSON.stringify(orderStatuses));
-    }
-
-    // Navigasyon güncelle
-    function updateNav() {
-      if (currentUser === 'admin') {
-        navLogin.classList.add('d-none');
-        navRegister.classList.add('d-none');
-        navLogout.classList.remove('d-none');
-        navAdminPanel.classList.remove('d-none');
-        navWelcome.textContent = `Hoşgeldiniz, ${currentUser}`;
-      } else if (currentUser) {
-        navLogin.classList.add('d-none');
-        navRegister.classList.add('d-none');
-        navLogout.classList.remove('d-none');
-        navAdminPanel.classList.add('d-none');
-        navWelcome.textContent = `Hoşgeldiniz, ${currentUser}`;
-      } else {
-        navLogin.classList.remove('d-none');
-        navRegister.classList.remove('d-none');
-        navLogout.classList.add('d-none');
-        navAdminPanel.classList.add('d-none');
-        navWelcome.textContent = '';
-      }
-    }
-
-    // Giriş/Kayıt arası geçiş
-    function showLogin() {
-      loginSection.classList.remove('d-none');
-      registerSection.classList.add('d-none');
-      loginMessage.textContent = '';
-      registerMessage.textContent = '';
-      authToggle.style.display = 'block';
-    }
-
-    function showRegister() {
-      loginSection.classList.add('d-none');
-      registerSection.classList.remove('d-none');
-      loginMessage.textContent = '';
-      registerMessage.textContent = '';
-      authToggle.style.display = 'block';
-    }
-
-    // Giriş yap
-    function login() {
-      const username = document.getElementById('loginUsername').value.trim();
-      const password = document.getElementById('loginPassword').value;
-
-      if (!username || !password) {
-        loginMessage.textContent = 'Lütfen kullanıcı adı ve şifre girin.';
-        return;
-      }
-      if (users[username] !== password) {
-        loginMessage.textContent = 'Kullanıcı adı veya şifre yanlış.';
-        return;
-      }
-      currentUser = username;
-      updateNav();
-      loginMessage.textContent = '';
-      authToggle.style.display = 'none';
-      showUserPanel();
-      loadUserData();
-    }
-
-    // Kayıt ol
-    function register() {
-      const username = document.getElementById('registerUsername').value.trim();
-      const password = document.getElementById('registerPassword').value;
-      const address = document.getElementById('registerAddress').value.trim();
-
-      if (!username || !password || !address) {
-        registerMessage.textContent = 'Lütfen tüm alanları doldurun.';
-        return;
-      }
-      if (users[username]) {
-        registerMessage.textContent = 'Bu kullanıcı adı zaten alınmış.';
-        return;
-      }
-      users[username] = password;
-      balances[username] = 0; // Başlangıç bakiyesi 0
-      addresses[username] = address;
-      orders[username] = [];
-      orderStatuses[username] = [];
-
-      saveData();
-
-      registerMessage.classList.remove('text-danger');
-      registerMessage.classList.add('text-success');
-      registerMessage.textContent = 'Kayıt başarılı! Giriş yapabilirsiniz.';
-
-      // Temizle
-      document.getElementById('registerUsername').value = '';
-      document.getElementById('registerPassword').value = '';
-      document.getElementById('registerAddress').value = '';
-
-      // Kayıt olduktan sonra kayıt formunu gizle giriş göster
-      setTimeout(() => {
-        showLogin();
-      }, 1500);
-    }
-
-    // Çıkış yap
-    function logout() {
-      currentUser = null;
-      adminSelectedUser = null;
-      updateNav();
-      hidePanels();
-      showLogin();
-    }
-
-    // Tüm panelleri gizle
-    function hidePanels() {
-      userPanel.classList.add('d-none');
-      adminPanel.classList.add('d-none');
-      loginSection.classList.add('d-none');
-      registerSection.classList.add('d-none');
-      authToggle.style.display = 'none';
-    }
-
-    // Kullanıcı panelini göster
-    function showUserPanel() {
-      hidePanels();
-      userPanel.classList.remove('d-none');
-      userNameDisplay.textContent = currentUser;
-      updateBalance();
-      showOrders();
-    }
-
-    // Bakiye güncelle
-    function updateBalance() {
-      balanceDisplay.textContent = balances[currentUser] ?? 0;
-    }
-
-    // Sipariş oluşturma
-    function createOrder() {
-      const product = productSelect.value;
-      const price = parseFloat(productSelect.selectedOptions[0].getAttribute('data-price'));
-      let quantity = parseInt(productQuantity.value);
-
-      if (isNaN(quantity) || quantity < 1) quantity = 1;
-
-      const totalPrice = price * quantity;
-
-      if ((balances[currentUser] ?? 0) < totalPrice) {
-        alert('Yetersiz bakiye!');
-        return;
-      }
-
-      // Sipariş detayı
-      const detail = `${product} x${quantity} (Toplam: ${totalPrice.toLocaleString('tr-TR')} TL)`;
-
-      balances[currentUser] -= totalPrice;
-      orders[currentUser].push(detail);
-      orderStatuses[currentUser].push('Sipariş Alındı');
-
-      saveData();
-      updateBalance();
-      showOrders();
-
-      alert('Siparişiniz alındı. Teşekkürler!');
-      productQuantity.value = 1;
-    }
-
-    // Siparişleri göster (aktif ve geçmiş)
-    function showOrders() {
-      activeOrdersDiv.innerHTML = '';
-      pastOrdersDiv.innerHTML = '';
-
-      const userOrders = orders[currentUser] || [];
-      const userStatuses = orderStatuses[currentUser] || [];
-
-      userOrders.forEach((order, i) => {
-        const status = userStatuses[i];
-        const div = document.createElement('div');
-        div.className = 'order-item';
-
-        if (status === 'Teslim Edildi') {
-          div.classList.add('delivered');
-          pastOrdersDiv.appendChild(div);
-        } else if (status === 'İptal Edildi') {
-          div.classList.add('cancelled');
-          pastOrdersDiv.appendChild(div);
-        } else {
-          activeOrdersDiv.appendChild(div);
-        }
-
-        div.textContent = `${order} | Durum: ${status}`;
+  function ilceDoldur(il) {
+    ilceListesi.innerHTML = '';
+    if(ilceler[il]) {
+      ilceler[il].forEach(ilce => {
+        const option = document.createElement('option');
+        option.value = ilce;
+        ilceListesi.appendChild(option);
       });
     }
+  }
 
-    // Admin panelini göster
-    function showAdminPanel() {
-      if (currentUser !== 'admin') {
-        alert('Admin erişimi için giriş yapmalısınız.');
-        return;
-      }
+  ilInput.addEventListener('input', () => {
+    ilceInput.value = '';
+    ilceDoldur(ilInput.value);
+  });
 
-      hidePanels();
-      adminPanel.classList.remove('d-none');
-      loadAdminUsers();
-      adminSelectedUser = null;
-      adminSelectedUserSpan.textContent = '';
-      adminOrderListDiv.innerHTML = '';
+  ilDoldur();
+
+  // Panel gösterme fonksiyonları
+  function girisPanelGoster() {
+    girisPanel.style.display = 'block';
+    kayitPanel.style.display = 'none';
+    urunlerContainer.style.display = 'none';
+    hesapPanel.classList.remove('active');
+    sepetPanel.classList.remove('active');
+    adminPanelBtn.classList.add('hidden');
+    aktifKullanici = null;
+    aktifKullaniciAdiSpan.textContent = '';
+    sepetAdetSpan.textContent = '0';
+  }
+
+  function kayitPanelGoster() {
+    kayitPanel.style.display = 'block';
+    girisPanel.style.display = 'none';
+    urunlerContainer.style.display = 'none';
+    hesapPanel.classList.remove('active');
+    sepetPanel.classList.remove('active');
+    adminPanelBtn.classList.add('hidden');
+  }
+
+  function toggleHesapPanel() {
+    hesapPanel.classList.toggle('active');
+  }
+  function toggleSepetPanel() {
+    sepetPanel.classList.toggle('active');
+  }
+
+  // Giriş yap
+  function girisYap() {
+    const kullanici = document.getElementById('girisKullanici').value.trim();
+    const sifre = document.getElementById('girisSifre').value;
+    if(users[kullanici] && users[kullanici] === sifre) {
+      aktifKullanici = kullanici;
+      aktifKullaniciAdiSpan.textContent = kullanici;
+      document.getElementById('btnGiris').classList.add('hidden');
+      document.getElementById('btnKayit').classList.add('hidden');
+      document.getElementById('btnHesap').classList.remove('hidden');
+      girisPanel.style.display = 'none';
+      kayitPanel.style.display = 'none';
+      urunlerContainer.style.display = 'grid';
+      hesapPanel.classList.add('active');
+      sepetPanel.classList.remove('active');
+      adminPanelBtn.classList.toggle('hidden', kullanici !== 'admin');
+      urunleriYukle();
+    } else {
+      alert('Hatalı kullanıcı adı veya şifre.');
     }
+  }
 
-    // Admin - Kullanıcı listesini yükle
-    function loadAdminUsers() {
-      adminUsersTableBody.innerHTML = '';
-
-      Object.keys(users).forEach(user => {
-        if (user === 'admin') return;
-
-        const tr = document.createElement('tr');
-
-        // Kullanıcı adı
-        const tdUser = document.createElement('td');
-        tdUser.textContent = user;
-
-        // Bakiye düzenleme inputu
-        const tdBalance = document.createElement('td');
-        const balanceInput = document.createElement('input');
-        balanceInput.type = 'number';
-        balanceInput.min = 0;
-        balanceInput.value = balances[user];
-        balanceInput.className = 'form-control';
-        balanceInput.style.maxWidth = '120px';
-        balanceInput.addEventListener('change', () => {
-          const val = parseInt(balanceInput.value);
-          if (!isNaN(val) && val >= 0) {
-            balances[user] = val;
-            saveData();
-            if (currentUser === user) updateBalance();
-          } else {
-            balanceInput.value = balances[user];
-          }
-        });
-        tdBalance.appendChild(balanceInput);
-
-        // Adres
-        const tdAddress = document.createElement('td');
-        tdAddress.textContent = addresses[user];
-
-        // İşlemler (siparişleri göster butonu)
-        const tdActions = document.createElement('td');
-        const viewOrdersBtn = document.createElement('button');
-        viewOrdersBtn.textContent = 'Siparişleri Gör';
-        viewOrdersBtn.className = 'btn btn-sm btn-primary';
-        viewOrdersBtn.addEventListener('click', () => {
-          adminSelectedUser = user;
-          adminSelectedUserSpan.textContent = user;
-          loadAdminUserOrders(user);
-        });
-        tdActions.appendChild(viewOrdersBtn);
-
-        tr.appendChild(tdUser);
-        tr.appendChild(tdBalance);
-        tr.appendChild(tdAddress);
-        tr.appendChild(tdActions);
-
-        adminUsersTableBody.appendChild(tr);
-      });
+  // Kayıt ol
+  function kayitOl() {
+    const kullanici = document.getElementById('kayitKullanici').value.trim();
+    const sifre = document.getElementById('kayitSifre').value;
+    if(!kullanici || !sifre) {
+      alert('Kullanıcı adı ve şifre boş olamaz.');
+      return;
     }
-
-    // Admin - Kullanıcı siparişlerini yükle
-    function loadAdminUserOrders(user) {
-      adminOrderListDiv.innerHTML = '';
-
-      const userOrders = orders[user] || [];
-      const userStatuses = orderStatuses[user] || [];
-
-      if (userOrders.length === 0) {
-        adminOrderListDiv.textContent = 'Sipariş bulunamadı.';
-        return;
-      }
-
-      userOrders.forEach((order, i) => {
-        const div = document.createElement('div');
-        div.className = 'd-flex align-items-center gap-3 adminOrderItem';
-
-        const span = document.createElement('span');
-        span.textContent = order;
-        span.style.flex = '1';
-
-        const select = document.createElement('select');
-        select.className = 'form-select form-select-sm';
-        ['Sipariş Alındı', 'Hazırlanıyor', 'Kargoda', 'Teslim Edildi', 'İptal Edildi'].forEach(status => {
-          const option = document.createElement('option');
-          option.value = status;
-          option.textContent = status;
-          if (status === userStatuses[i]) option.selected = true;
-          select.appendChild(option);
-        });
-
-        select.addEventListener('change', () => {
-          orderStatuses[user][i] = select.value;
-          saveData();
-          showOrders();
-        });
-
-        div.appendChild(span);
-        div.appendChild(select);
-        adminOrderListDiv.appendChild(div);
-      });
+    if(users[kullanici]) {
+      alert('Bu kullanıcı adı zaten mevcut.');
+      return;
     }
+    users[kullanici] = sifre;
+    alert('Kayıt başarılı, lütfen giriş yapınız.');
+    kayitPanel.style.display = 'none';
+    girisPanel.style.display = 'block';
+  }
 
-    // Kullanıcı verilerini yükle (sipariş vs)
-    function loadUserData() {
-      updateBalance();
-      showOrders();
+  // Çıkış yap
+  function cikisYap() {
+    aktifKullanici = null;
+    document.getElementById('btnGiris').classList.remove('hidden');
+    document.getElementById('btnKayit').classList.remove('hidden');
+    document.getElementById('btnHesap').classList.add('hidden');
+    urunlerContainer.style.display = 'none';
+    hesapPanel.classList.remove('active');
+    sepetPanel.classList.remove('active');
+    girisPanel.style.display = 'block';
+    sepet = {};
+    sepetiGuncelle();
+  }
+
+  // Ürünleri yükle ve göster
+  function urunleriYukle() {
+    urunlerContainer.innerHTML = '';
+    urunler.forEach(u => {
+      const div = document.createElement('div');
+      div.className = 'product-card';
+      div.innerHTML = `
+        <img src="${u.resimler[0]}" alt="${u.ad}" />
+        <div class="product-info">
+          <h3>${u.ad}</h3>
+          <p class="description">${u.aciklama}</p>
+          <p class="price">${u.fiyat}</p>
+        </div>
+      `;
+      div.onclick = () => urunDetayGoster(u);
+      urunlerContainer.appendChild(div);
+    });
+  }
+
+  // Ürün detayını göster
+  function urunDetayGoster(u) {
+    aktifUrun = u;
+    detayResim.src = u.resimler[0];
+    detayResim.alt = u.ad;
+    detayResim.setAttribute('data-index', '0');
+    thumbnailList.innerHTML = '';
+    u.resimler.forEach((img, idx) => {
+      const t = document.createElement('img');
+      t.src = img;
+      if(idx === 0) t.classList.add('active');
+      t.onclick = () => {
+        detayResim.src = img;
+        detayResim.setAttribute('data-index', idx);
+        thumbnailList.querySelectorAll('img').forEach(im => im.classList.remove('active'));
+        t.classList.add('active');
+      };
+      thumbnailList.appendChild(t);
+    });
+    document.getElementById('detayBaslik').textContent = u.ad;
+    document.getElementById('detayAciklama').textContent = u.aciklama;
+    document.getElementById('detayFiyat').textContent = u.fiyat;
+    document.getElementById('detayTarih').textContent = `Yüklenme Tarihi: ${u.tarih}`;
+    urunDetayPanel.classList.add('active');
+  }
+
+  // Ürün detay panelini kapat
+  function kapatDetay() {
+    urunDetayPanel.classList.remove('active');
+    aktifUrun = null;
+  }
+
+  // Sepete ekle
+  function sepeteEkle() {
+    if(!aktifUrun) return;
+    const id = aktifUrun.id;
+    if(sepet[id]) sepet[id]++;
+    else sepet[id] = 1;
+    alert(`${aktifUrun.ad} sepete eklendi.`);
+    sepetiGuncelle();
+    kapatDetay();
+    // Sepet panelini aç
+    sepetPanel.classList.add('active');
+  }
+
+  // Sepeti güncelle
+  function sepetiGuncelle() {
+    sepetIcerik.innerHTML = '';
+    const ids = Object.keys(sepet);
+    sepetAdetSpan.textContent = ids.reduce((acc,id) => acc + sepet[id],0);
+    if(ids.length === 0) {
+      sepetIcerik.innerHTML = '<p class="text-gray-500">Sepetiniz boş.</p>';
+      btnSiparis.disabled = true;
+      return;
     }
+    btnSiparis.disabled = false;
 
-    // Olay dinleyiciler
-    navLogin.addEventListener('click', () => {
-      showLogin();
-      hidePanels();
-      loginSection.classList.remove('d-none');
-    });
-    navRegister.addEventListener('click', () => {
-      showRegister();
-      hidePanels();
-      registerSection.classList.remove('d-none');
-    });
-    navLogout.addEventListener('click', () => {
-      logout();
-    });
-    navAdminPanel.addEventListener('click', () => {
-      showAdminPanel();
-    });
+    ids.forEach(id => {
+      const urun = urunler.find(u => u.id == id);
+      const adet = sepet[id];
+      const div = document.createElement('div');
+      div.className = 'flex items-center justify-between mb-3 border-b pb-2';
 
-    toggleLogin.addEventListener('click', () => {
-      showLogin();
+      div.innerHTML = `
+        <div>
+          <p class="font-semibold">${urun.ad}</p>
+          <p class="text-sm text-gray-600">${urun.fiyat} x ${adet} = ${parseInt(urun.fiyat) * adet} TL</p>
+          <div class="flex items-center gap-2 mt-1">
+            <button onclick="urunAzalt(${id})" class="bg-red-500 hover:bg-red-600 text-white px-2 rounded">-</button>
+            <span>${adet}</span>
+            <button onclick="urunArttir(${id})" class="bg-green-500 hover:bg-green-600 text-white px-2 rounded">+</button>
+          </div>
+        </div>
+      `;
+      sepetIcerik.appendChild(div);
     });
+  }
 
-    toggleRegister.addEventListener('click', () => {
-      showRegister();
-    });
+  // Ürün azalt
+  function urunAzalt(id) {
+    if(sepet[id]) {
+      sepet[id]--;
+      if(sepet[id] <= 0) delete sepet[id];
+      sepetiGuncelle();
+    }
+  }
 
-    document.getElementById('loginBtn').addEventListener('click', login);
-    document.getElementById('registerBtn').addEventListener('click', register);
-    createOrderBtn.addEventListener('click', createOrder);
+  // Ürün arttır
+  function urunArttir(id) {
+    if(sepet[id]) {
+      sepet[id]++;
+      sepetiGuncelle();
+    }
+  }
 
-    // Sayfa açılınca
-    window.onload = () => {
-      updateNav();
-      showLogin();
-    };
-  </script>
+  // Sipariş ver
+  function siparisVer() {
+    if(Object.keys(sepet).length === 0) {
+      alert('Sepetiniz boş!');
+      return;
+    }
+    alert('Siparişiniz alındı! Teşekkürler.');
+    sepet = {};
+    sepetiGuncelle();
+    sepetPanel.classList.remove('active');
+  }
+
+  // Admin panel göster (alert ile basit)
+  function adminPanelGoster() {
+    alert('Admin panel açıldı. (Şimdilik sadece uyarı)');
+  }
+
+  // Başlangıçta giriş panelini göster
+  girisPanelGoster();
+
+</script>
+
 </body>
-
 </html>
