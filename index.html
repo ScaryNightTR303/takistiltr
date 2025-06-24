@@ -4,84 +4,72 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HızlıAlış</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <style>
-    body { font-family: sans-serif; margin: 0; padding: 0; background: #f5f5f5; }
-    header, footer { background: #111; color: #fff; text-align: center; padding: 1em; }
-    nav a { margin: 0 10px; color: #fff; text-decoration: none; }
-    .container { padding: 20px; max-width: 800px; margin: auto; background: white; }
-    .form input, .form textarea, .form button, .form select { display: block; width: 100%; margin: 10px 0; padding: 10px; }
-    #kullaniciSiparisleri { margin-top: 30px; }
-    .siparis-kutu { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; }
-    .aktif { background: #e8f8e8; }
-    .gecmis { background: #f9e8e8; }
-    .urun-gorsel { width: 100%; max-height: 150px; object-fit: contain; margin-bottom: 10px; }
+    body { font-family: 'Poppins', sans-serif; }
   </style>
 </head>
-<body>
-  <header>
-    <h1>HızlıAlış</h1>
+<body class="bg-gray-100 min-h-screen">
+  <header class="bg-blue-900 text-white p-4 flex justify-between items-center">
+    <h1 class="text-2xl font-bold">HızlıAlış</h1>
     <nav>
-      <a href="#giris">Giriş Yap</a>
-      <a href="#kayit">Kayıt Ol</a>
+      <button onclick="girisPanelGoster()" class="mx-2 px-4 py-2 bg-blue-700 rounded hover:bg-blue-600">Giriş Yap</button>
+      <button onclick="kayitPanelGoster()" class="mx-2 px-4 py-2 bg-green-700 rounded hover:bg-green-600">Kayıt Ol</button>
     </nav>
   </header>
 
-  <div class="container">
-    <section id="giris">
-      <h2>Giriş</h2>
-      <div class="form">
-        <input type="text" id="girisKullanici" placeholder="Kullanıcı Adı">
-        <input type="password" id="girisSifre" placeholder="Şifre">
-        <button onclick="girisYap()">Giriş Yap</button>
-      </div>
+  <main class="container mx-auto py-8">
+    <section id="giris" class="max-w-md mx-auto bg-white rounded shadow p-6">
+      <h2 class="text-xl font-semibold mb-4">Giriş Yap</h2>
+      <input type="text" id="girisKullanici" placeholder="Kullanıcı Adı" class="w-full mb-3 p-2 border rounded">
+      <input type="password" id="girisSifre" placeholder="Şifre" class="w-full mb-3 p-2 border rounded">
+      <button onclick="girisYap()" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-500">Giriş Yap</button>
     </section>
 
-    <section id="kayit">
-      <h2>Kayıt</h2>
-      <div class="form">
-        <input type="text" id="kayitKullanici" placeholder="Kullanıcı Adı">
-        <input type="password" id="kayitSifre" placeholder="Şifre">
-        <select id="kayitIl" onchange="ilceGetir()">
-          <option value="">İl Seçin</option>
-        </select>
-        <select id="kayitIlce">
-          <option value="">İlçe Seçin</option>
-        </select>
-        <input type="text" id="kayitAdres" placeholder="Açık Adres">
-        <input type="text" id="kayitPostaKodu" placeholder="Posta Kodu">
-        <input type="text" id="kayitTelefon" placeholder="Telefon Numarası">
-        <button onclick="kayitOl()">Kayıt Ol</button>
-      </div>
+    <section id="kayit" class="max-w-md mx-auto bg-white rounded shadow p-6 hidden">
+      <h2 class="text-xl font-semibold mb-4">Kayıt Ol</h2>
+      <input type="text" id="kayitKullanici" placeholder="Kullanıcı Adı" class="w-full mb-3 p-2 border rounded">
+      <input type="password" id="kayitSifre" placeholder="Şifre" class="w-full mb-3 p-2 border rounded">
+      <select id="kayitIl" onchange="ilceGetir()" class="w-full mb-3 p-2 border rounded">
+        <option value="">İl Seçin</option>
+      </select>
+      <select id="kayitIlce" class="w-full mb-3 p-2 border rounded">
+        <option value="">İlçe Seçin</option>
+      </select>
+      <input type="text" id="kayitAdres" placeholder="Açık Adres" class="w-full mb-3 p-2 border rounded">
+      <input type="text" id="kayitPostaKodu" placeholder="Posta Kodu" class="w-full mb-3 p-2 border rounded">
+      <input type="text" id="kayitTelefon" placeholder="Telefon Numarası" class="w-full mb-3 p-2 border rounded">
+      <button onclick="kayitOl()" class="w-full bg-green-600 text-white p-2 rounded hover:bg-green-500">Kayıt Ol</button>
     </section>
 
-    <section id="siparisVer" style="display:none">
-      <h2>Sipariş Ver</h2>
-      <div class="form">
-        <select id="urunSec">
-          <option value="Telefon" data-fiyat="15000">Telefon - 15000 TL</option>
-          <option value="Kulaklık" data-fiyat="500">Kulaklık - 500 TL</option>
-          <option value="Klavye" data-fiyat="1000">Klavye - 1000 TL</option>
-        </select>
-        <img id="urunGorsel" class="urun-gorsel" src="https://via.placeholder.com/300x150" alt="Ürün Görseli">
-        <input type="number" id="siparisAdet" placeholder="Adet" value="1">
-        <button onclick="siparisOlustur()">Sipariş Oluştur</button>
-      </div>
+    <section id="siparisVer" class="mt-8 max-w-md mx-auto bg-white rounded shadow p-6 hidden">
+      <h2 class="text-xl font-semibold mb-4">Sipariş Ver</h2>
+      <select id="urunSec" class="w-full mb-3 p-2 border rounded">
+        <option value="Telefon" data-fiyat="15000">Telefon - 15000 TL</option>
+        <option value="Kulaklık" data-fiyat="500">Kulaklık - 500 TL</option>
+        <option value="Klavye" data-fiyat="1000">Klavye - 1000 TL</option>
+      </select>
+      <img id="urunGorsel" class="w-full h-40 object-contain mb-3" src="https://via.placeholder.com/300x150" alt="Ürün Görseli">
+      <input type="number" id="siparisAdet" value="1" class="w-full mb-3 p-2 border rounded">
+      <button onclick="siparisOlustur()" class="w-full bg-yellow-500 text-white p-2 rounded hover:bg-yellow-400">Sipariş Oluştur</button>
     </section>
 
-    <section id="kullaniciSiparisleri" style="display:none">
-      <h2>Siparişlerim</h2>
-      <div id="aktifSiparisler">
-        <h3>Aktif Siparişler</h3>
-        <div id="aktifListesi"></div>
+    <section id="kullaniciSiparisleri" class="mt-8 max-w-2xl mx-auto hidden">
+      <h2 class="text-xl font-semibold mb-4">Siparişlerim</h2>
+      <div id="aktifSiparisler" class="mb-6">
+        <h3 class="text-lg font-semibold mb-2">Aktif Siparişler</h3>
+        <div id="aktifListesi" class="space-y-2"></div>
       </div>
       <div id="gecmisSiparisler">
-        <h3>Geçmiş Siparişler</h3>
-        <div id="gecmisListesi"></div>
+        <h3 class="text-lg font-semibold mb-2">Geçmiş Siparişler</h3>
+        <div id="gecmisListesi" class="space-y-2"></div>
       </div>
     </section>
-  </div>
+  </main>
 
-  <footer>
+  <footer class="bg-blue-900 text-white text-center p-4 mt-10">
     <p>&copy; 2025 HızlıAlış</p>
   </footer>
 
@@ -90,7 +78,6 @@
       'İstanbul': ['Kadıköy', 'Üsküdar', 'Beşiktaş'],
       'Ankara': ['Çankaya', 'Keçiören', 'Mamak'],
       'İzmir': ['Konak', 'Karşıyaka', 'Bornova']
-      // Gerçek projede 81 il ve ilçeleri API veya JSON'dan çekilmelidir.
     };
 
     window.onload = function() {
@@ -116,6 +103,16 @@
       }
     }
 
+    function girisPanelGoster() {
+      document.getElementById('giris').classList.remove('hidden');
+      document.getElementById('kayit').classList.add('hidden');
+    }
+
+    function kayitPanelGoster() {
+      document.getElementById('kayit').classList.remove('hidden');
+      document.getElementById('giris').classList.add('hidden');
+    }
+
     let aktifKullanici = null;
     const users = JSON.parse(localStorage.getItem('users')) || {"admin":"admin1212"};
     const bakiyeler = JSON.parse(localStorage.getItem('bakiyeler')) || {"admin":0};
@@ -132,7 +129,6 @@
       const postaKodu = document.getElementById('kayitPostaKodu').value;
       const telefon = document.getElementById('kayitTelefon').value;
       const tamAdres = `${il}/${ilce} - ${acikAdres} (${postaKodu}) Tel: ${telefon}`;
-
       if (users[k]) return alert('Kullanıcı zaten var.');
       users[k] = s;
       bakiyeler[k] = 100;
@@ -153,8 +149,8 @@
       if (users[k] === s) {
         aktifKullanici = k;
         if (k !== 'admin') {
-          document.getElementById('siparisVer').style.display = 'block';
-          document.getElementById('kullaniciSiparisleri').style.display = 'block';
+          document.getElementById('siparisVer').classList.remove('hidden');
+          document.getElementById('kullaniciSiparisleri').classList.remove('hidden');
           gosterSiparisler();
         } else {
           alert('Admin paneli bu örnekte eklenmedi.');
@@ -199,7 +195,7 @@
       (siparisler[aktifKullanici] || []).forEach((s, i) => {
         const durum = siparisDurumlari[aktifKullanici][i];
         const el = document.createElement('div');
-        el.className = 'siparis-kutu ' + (durum === 'Teslim Edildi' ? 'gecmis' : 'aktif');
+        el.className = `p-3 rounded shadow ${durum === 'Teslim Edildi' ? 'bg-green-100' : 'bg-yellow-100'}`;
         el.textContent = s + ' | Durum: ' + durum;
         if (durum === 'Teslim Edildi') {
           gecmisDiv.appendChild(el);
