@@ -27,6 +27,9 @@
     #hesapPanel.active {
       transform: translateX(0);
     }
+    #adminPanel {
+      display: none;
+    }
   </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
@@ -68,15 +71,43 @@
   <!-- HESAP PANELİ SLIDE -->
   <aside
     id="hesapPanel"
-    class="fixed top-0 right-0 w-64 h-full bg-white shadow-lg z-50 p-4 flex flex-col"
+    class="fixed top-0 right-0 w-72 h-full bg-white shadow-lg z-50 p-4 flex flex-col"
   >
+    <!-- Çarpı butonu -->
+    <button
+      onclick="kapatHesapPanel()"
+      class="self-start text-gray-600 hover:text-gray-900 mb-4 text-2xl font-bold"
+      title="Kapat"
+      aria-label="Paneli kapat"
+    >
+      &times;
+    </button>
+
     <h2 class="text-xl font-semibold mb-4">Hesabım</h2>
-    <div class="flex-1" id="hesapBilgi">
+
+    <div class="flex-1 overflow-auto">
       <p class="mb-2 font-medium">Hoş geldiniz!</p>
-      <p><strong>Kullanıcı:</strong> <span id="hesapKullanici"></span></p>
-      <p><strong>Bakiye:</strong> <span id="hesapBakiye"></span> TL</p>
-      <p><strong>Adres:</strong> <span id="hesapAdres"></span></p>
+      <p>
+        <strong>Kullanıcı:</strong> <span id="hesapKullanici"></span>
+      </p>
+      <p>
+        <strong>Bakiye:</strong> <span id="hesapBakiye"></span> TL
+      </p>
+      <p>
+        <strong>Adres:</strong> <span id="hesapAdres"></span>
+      </p>
+
+      <!-- Admin Paneli Linki -->
+      <button
+        id="btnAdminPanel"
+        onclick="adminPanelAc()"
+        class="mt-6 w-full bg-blue-700 text-white py-2 rounded hover:bg-blue-600"
+        style="display:none;"
+      >
+        Admin Paneli
+      </button>
     </div>
+
     <button
       onclick="cikisYap()"
       class="mt-auto bg-red-600 text-white px-4 py-2 rounded hover:bg-red-500"
@@ -199,6 +230,33 @@
         <div id="gecmisListesi" class="space-y-2"></div>
       </div>
     </section>
+
+    <!-- ADMIN PANELİ -->
+    <section
+      id="adminPanel"
+      class="max-w-5xl mx-auto bg-white rounded shadow p-6 mt-8"
+    >
+      <h2 class="text-2xl font-semibold mb-6">Admin Paneli</h2>
+      <p class="mb-4">
+        Burada kullanıcılar, bakiyeler ve siparişler yönetilebilir.
+      </p>
+      <div class="overflow-x-auto">
+        <table class="min-w-full border border-gray-300">
+          <thead>
+            <tr class="bg-gray-100">
+              <th class="border border-gray-300 px-3 py-2">Kullanıcı</th>
+              <th class="border border-gray-300 px-3 py-2">Bakiye (TL)</th>
+              <th class="border border-gray-300 px-3 py-2">Adres</th>
+              <th class="border border-gray-300 px-3 py-2">Siparişler</th>
+              <th class="border border-gray-300 px-3 py-2">Durumları</th>
+              <th class="border border-gray-300 px-3 py-2">Bakiye Güncelle</th>
+              <th class="border border-gray-300 px-3 py-2">Sipariş Durumu Güncelle</th>
+            </tr>
+          </thead>
+          <tbody id="adminTabloGovde"></tbody>
+        </table>
+      </div>
+    </section>
   </main>
 
   <footer
@@ -215,7 +273,7 @@
       İzmir: ["Konak", "Karşıyaka", "Bornova"],
     };
 
-    // Ürün verileri (gerçek görsellerle değiştirilmiştir)
+    // Ürün verileri (gerçek görsellerle)
     const urunler = [
       {
         id: 1,
@@ -305,17 +363,18 @@
       admin: [],
     };
 
-    // İl dropdown doldurma
+    // Sayfa açılınca illeri doldur
     window.onload = () => {
+      const ilSelect = document.getElementById("kayitIl");
       for (const il in iller) {
         const option = document.createElement("option");
         option.value = il;
         option.textContent = il;
-        document.getElementById("kayitIl").appendChild(option);
+        ilSelect.appendChild(option);
       }
-      urunleriGoster();
     };
 
+    // İlçeleri getir
     function ilceGetir() {
       const il = document.getElementById("kayitIl").value;
       const ilceSelect = document.getElementById("kayitIlce");
@@ -330,117 +389,109 @@
       }
     }
 
-    // Panel gösterme fonksiyonları
+    // Giriş ve kayıt panellerini göster/gizle
     function girisPanelGoster() {
       document.getElementById("giris").style.display = "block";
       document.getElementById("kayit").style.display = "none";
     }
-
     function kayitPanelGoster() {
       document.getElementById("kayit").style.display = "block";
       document.getElementById("giris").style.display = "none";
     }
 
-    // Kayıt olma
+    // Kayıt olma fonksiyonu
     function kayitOl() {
       const k = document.getElementById("kayitKullanici").value.trim();
-      const s = document.getElementById("kayitSifre").value;
+      const s = document.getElementById("kayitSifre").value.trim();
       const il = document.getElementById("kayitIl").value;
       const ilce = document.getElementById("kayitIlce").value;
       const acikAdres = document.getElementById("kayitAdres").value.trim();
       const postaKodu = document.getElementById("kayitPostaKodu").value.trim();
       const telefon = document.getElementById("kayitTelefon").value.trim();
-      const tamAdres = `${il}/${ilce} - ${acikAdres} (${postaKodu}) Tel: ${telefon}`;
 
       if (!k || !s || !il || !ilce || !acikAdres || !postaKodu || !telefon) {
         alert("Lütfen tüm alanları doldurun.");
         return;
       }
       if (users[k]) {
-        alert("Kullanıcı zaten var.");
+        alert("Kullanıcı zaten kayıtlı.");
         return;
       }
+
       users[k] = s;
-      bakiyeler[k] = 100;
-      adresler[k] = tamAdres;
+      bakiyeler[k] = 100; // Başlangıç bakiyesi
+      adresler[k] = `${il}/${ilce} - ${acikAdres} (${postaKodu}) Tel: ${telefon}`;
       siparisler[k] = [];
       siparisDurumlari[k] = [];
       kaydetVerileri();
-      alert("Kayıt başarılı.");
-      kayitPanelGoster();
+      alert("Kayıt başarılı!");
+      girisPanelGoster();
     }
 
-    // Giriş yapma
+    // Giriş yapma fonksiyonu
     function girisYap() {
       const k = document.getElementById("girisKullanici").value.trim();
-      const s = document.getElementById("girisSifre").value;
+      const s = document.getElementById("girisSifre").value.trim();
       if (users[k] === s) {
         aktifKullanici = k;
-        document.getElementById("btnGiris").classList.add("hidden");
-        document.getElementById("btnKayit").classList.add("hidden");
-        document.getElementById("btnHesap").classList.remove("hidden");
-        document.getElementById("giris").style.display = "none";
-        document.getElementById("kayit").style.display = "none";
-        document.getElementById("urunler").classList.remove("hidden");
-        document.getElementById("kullaniciSiparisleri").classList.remove("hidden");
-        gosterSiparisler();
+        alert(`Giriş başarılı. Hoş geldiniz ${k}!`);
         hesapBilgileriniGoster();
+        girisSonrasiHazirlik();
       } else {
-        alert("Bilgiler yanlış.");
+        alert("Kullanıcı adı veya şifre yanlış.");
       }
+    }
+
+    // Giriş sonrası ayarlamalar
+    function girisSonrasiHazirlik() {
+      // Giriş yap ve kayıt ol butonlarını gizle, hesap butonunu göster
+      document.getElementById("btnGiris").style.display = "none";
+      document.getElementById("btnKayit").style.display = "none";
+      document.getElementById("btnHesap").style.display = "inline-block";
+
+      // Giriş ve kayıt panellerini gizle
+      document.getElementById("giris").style.display = "none";
+      document.getElementById("kayit").style.display = "none";
+
+      // Ürünler ve siparişler bölümlerini aç
+      document.getElementById("urunler").style.display = "block";
+      document.getElementById("kullaniciSiparisleri").style.display = "block";
+
+      // Admin ise admin panel butonunu göster, değilse gizle
+      if (aktifKullanici === "admin") {
+        document.getElementById("btnAdminPanel").style.display = "block";
+      } else {
+        document.getElementById("btnAdminPanel").style.display = "none";
+      }
+
+      urunleriGoster();
+      gosterSiparisler();
     }
 
     // Hesap panelini aç/kapa
     function toggleHesapPanel() {
       const panel = document.getElementById("hesapPanel");
       panel.classList.toggle("active");
-      hesapBilgileriniGoster();
+    }
+    function kapatHesapPanel() {
+      document.getElementById("hesapPanel").classList.remove("active");
     }
 
-    // Hesap bilgileri göster
+    // Hesap bilgilerini göster
     function hesapBilgileriniGoster() {
-      if (!aktifKullanici) return;
       document.getElementById("hesapKullanici").textContent = aktifKullanici;
       document.getElementById("hesapBakiye").textContent = bakiyeler[aktifKullanici] || 0;
-      document.getElementById("hesapAdres").textContent = adresler[aktifKullanici] || "";
+      document.getElementById("hesapAdres").textContent = adresler[aktifKullanici] || "-";
     }
 
-    // Çıkış yap
-    function cikisYap() {
-      aktifKullanici = null;
-      document.getElementById("btnGiris").classList.remove("hidden");
-      document.getElementById("btnKayit").classList.remove("hidden");
-      document.getElementById("btnHesap").classList.add("hidden");
-      document.getElementById("urunler").classList.add("hidden");
-      document.getElementById("kullaniciSiparisleri").classList.add("hidden");
-      document.getElementById("hesapPanel").classList.remove("active");
-      document.getElementById("giris").style.display = "block";
-      document.getElementById("kayit").style.display = "none";
-      temizleFormlar();
-    }
-
-    // Formları temizle
-    function temizleFormlar() {
-      document.getElementById("girisKullanici").value = "";
-      document.getElementById("girisSifre").value = "";
-      document.getElementById("kayitKullanici").value = "";
-      document.getElementById("kayitSifre").value = "";
-      document.getElementById("kayitIl").value = "";
-      document.getElementById("kayitIlce").innerHTML =
-        '<option value="">İlçe Seçin</option>';
-      document.getElementById("kayitAdres").value = "";
-      document.getElementById("kayitPostaKodu").value = "";
-      document.getElementById("kayitTelefon").value = "";
-    }
-
-    // Ürünleri göster
+    // Ürünleri listele
     function urunleriGoster() {
-      const urunDiv = document.getElementById("urunListesi");
-      urunDiv.innerHTML = "";
+      const urunListesi = document.getElementById("urunListesi");
+      urunListesi.innerHTML = "";
       urunler.forEach((urun) => {
         const card = document.createElement("div");
         card.className =
-          "bg-white rounded shadow hover:shadow-lg transition p-4 flex flex-col items-center";
+          "bg-white p-4 rounded shadow flex flex-col items-center";
 
         const img = document.createElement("img");
         img.src = urun.gorsel;
@@ -475,7 +526,7 @@
         card.appendChild(adetInput);
         card.appendChild(siparisBtn);
 
-        urunDiv.appendChild(card);
+        urunListesi.appendChild(card);
       });
     }
 
@@ -538,13 +589,151 @@
       });
     }
 
-    // Verileri localStorage'a kaydet
+    // Admin panelini aç
+    function adminPanelAc() {
+      document.getElementById("adminPanel").style.display = "block";
+      kapatHesapPanel();
+      adminTabloGuncelle();
+    }
+
+    // Admin tablosunu güncelle
+    function adminTabloGuncelle() {
+      const tbody = document.getElementById("adminTabloGovde");
+      tbody.innerHTML = "";
+
+      Object.keys(users).forEach((kullanici) => {
+        const tr = document.createElement("tr");
+        tr.className = "border border-gray-300";
+
+        // Kullanıcı adı
+        const tdKullanici = document.createElement("td");
+        tdKullanici.className = "border border-gray-300 px-3 py-2";
+        tdKullanici.textContent = kullanici;
+        tr.appendChild(tdKullanici);
+
+        // Bakiye
+        const tdBakiye = document.createElement("td");
+        tdBakiye.className = "border border-gray-300 px-3 py-2";
+        tdBakiye.textContent = bakiyeler[kullanici] || 0;
+        tr.appendChild(tdBakiye);
+
+        // Adres
+        const tdAdres = document.createElement("td");
+        tdAdres.className = "border border-gray-300 px-3 py-2";
+        tdAdres.textContent = adresler[kullanici] || "-";
+        tr.appendChild(tdAdres);
+
+        // Siparişler
+        const tdSiparis = document.createElement("td");
+        tdSiparis.className = "border border-gray-300 px-3 py-2";
+        tdSiparis.innerHTML = (siparisler[kullanici] || [])
+          .map((s) => `<div>${s}</div>`)
+          .join("");
+        tr.appendChild(tdSiparis);
+
+        // Durumlar
+        const tdDurum = document.createElement("td");
+        tdDurum.className = "border border-gray-300 px-3 py-2";
+        tdDurum.innerHTML = (siparisDurumlari[kullanici] || [])
+          .map((d) => `<div>${d}</div>`)
+          .join("");
+        tr.appendChild(tdDurum);
+
+        // Bakiye güncelleme input ve buton
+        const tdBakiyeGuncelle = document.createElement("td");
+        tdBakiyeGuncelle.className = "border border-gray-300 px-3 py-2";
+        const inputBakiye = document.createElement("input");
+        inputBakiye.type = "number";
+        inputBakiye.value = bakiyeler[kullanici] || 0;
+        inputBakiye.className = "w-full border rounded p-1";
+        tdBakiyeGuncelle.appendChild(inputBakiye);
+        const btnBakiyeGuncelle = document.createElement("button");
+        btnBakiyeGuncelle.textContent = "Güncelle";
+        btnBakiyeGuncelle.className =
+          "mt-1 w-full bg-blue-700 text-white rounded py-1 hover:bg-blue-600";
+        btnBakiyeGuncelle.onclick = () => {
+          const yeniBakiye = parseFloat(inputBakiye.value);
+          if (isNaN(yeniBakiye) || yeniBakiye < 0) {
+            alert("Geçerli bakiye girin.");
+            return;
+          }
+          bakiyeler[kullanici] = yeniBakiye;
+          kaydetVerileri();
+          hesapBilgileriniGoster();
+          adminTabloGuncelle();
+          alert(`${kullanici} kullanıcısının bakiyesi güncellendi.`);
+        };
+        tdBakiyeGuncelle.appendChild(btnBakiyeGuncelle);
+        tr.appendChild(tdBakiyeGuncelle);
+
+        // Sipariş durumu güncelleme (select + buton)
+        const tdDurumGuncelle = document.createElement("td");
+        tdDurumGuncelle.className = "border border-gray-300 px-3 py-2";
+        const selectDurum = document.createElement("select");
+        selectDurum.className = "w-full border rounded p-1";
+        const durumlar = [
+          "Sipariş Alındı",
+          "Hazırlanıyor",
+          "Yolda",
+          "Teslim Edildi",
+          "İptal Edildi",
+        ];
+        durumlar.forEach((d) => {
+          const option = document.createElement("option");
+          option.value = d;
+          option.textContent = d;
+          selectDurum.appendChild(option);
+        });
+        tdDurumGuncelle.appendChild(selectDurum);
+
+        const btnDurumGuncelle = document.createElement("button");
+        btnDurumGuncelle.textContent = "Güncelle";
+        btnDurumGuncelle.className =
+          "mt-1 w-full bg-green-700 text-white rounded py-1 hover:bg-green-600";
+        btnDurumGuncelle.onclick = () => {
+          const seciliDurum = selectDurum.value;
+          if (!siparisDurumlari[kullanici] || siparisDurumlari[kullanici].length === 0) {
+            alert("Güncellenecek sipariş yok.");
+            return;
+          }
+          // Sadece ilk siparişin durumunu güncelle
+          siparisDurumlari[kullanici][0] = seciliDurum;
+          kaydetVerileri();
+          adminTabloGuncelle();
+          gosterSiparisler();
+          alert(`${kullanici} kullanıcısının sipariş durumu güncellendi.`);
+        };
+        tdDurumGuncelle.appendChild(btnDurumGuncelle);
+        tr.appendChild(tdDurumGuncelle);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Verileri kaydet
     function kaydetVerileri() {
       localStorage.setItem("users", JSON.stringify(users));
       localStorage.setItem("bakiyeler", JSON.stringify(bakiyeler));
       localStorage.setItem("adresler", JSON.stringify(adresler));
       localStorage.setItem("siparisler", JSON.stringify(siparisler));
       localStorage.setItem("siparisDurumlari", JSON.stringify(siparisDurumlari));
+    }
+
+    // Çıkış yap
+    function cikisYap() {
+      aktifKullanici = null;
+      document.getElementById("btnHesap").style.display = "none";
+      document.getElementById("btnGiris").style.display = "inline-block";
+      document.getElementById("btnKayit").style.display = "inline-block";
+      document.getElementById("hesapPanel").classList.remove("active");
+      document.getElementById("urunler").style.display = "none";
+      document.getElementById("kullaniciSiparisleri").style.display = "none";
+      document.getElementById("adminPanel").style.display = "none";
+
+      document.getElementById("giris").style.display = "block";
+      document.getElementById("kayit").style.display = "none";
+
+      alert("Çıkış yapıldı.");
     }
   </script>
 </body>
